@@ -14,9 +14,8 @@ classdef Lab2AssessmentTest1 < handle
 			input('Press enter to begin')
 % 			self.LinearUr5();
 % 			self.A0509();
-			self.Environmnet();
-
-% 			self.Question4();
+% 			self.Environmnet();
+% 			self.thread1();
 		end
 	end
 
@@ -61,8 +60,7 @@ function Environmnet()
 %% Question 4 Derive the DH parameters for the simple 3 link manipulator provided. 
 
 
-% Use these to generate a  models of the manipulator using the Robot Toolbox in MATLAB 
-        function Question4()
+        function thread1()
 
             
             
