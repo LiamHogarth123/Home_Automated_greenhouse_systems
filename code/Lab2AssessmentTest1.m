@@ -21,7 +21,7 @@ classdef Lab2AssessmentTest1 < handle
 
     methods(Static)
 %% Question 1: Animate transform (Quad copter flying)
-    function LinearUr5()
+        function LinearUr5()
             mdl_LinearUr5
 
             workspace = [-1 2.5 -2 2 -1 2];
@@ -47,19 +47,17 @@ classdef Lab2AssessmentTest1 < handle
             
             p560.plot(qz,'workspace',workspace,'scale',scale); 
             
-
+    
             hold on;
                 
         end
 
 %% Question3point8        
-function Environmnet()  
-            
+        function Environment()  
+                    
         end
 
 %% Question 4 Derive the DH parameters for the simple 3 link manipulator provided. 
-
-
         function thread1()
 
             
