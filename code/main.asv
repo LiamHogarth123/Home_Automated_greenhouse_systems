@@ -1,6 +1,0 @@
-spawnEnvironment()
-
-    q = [0 0 0 0 0 0 0];
-    r = LinearUR3();
-    r.model;
-    r.model.teach(q)
