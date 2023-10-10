@@ -36,7 +36,7 @@ classdef Lab2AssessmentTest1 < handle
 
 %% Question 2: Plotting and moving the herd of RobotCows
         function A0509()
-             mdl_A0509
+            mdl_A0509
             
             % specify workspace
             workspace = [-1 2.5 -2 2 -1 2];
