@@ -1,12 +1,12 @@
 # Industrial_Robotics_UndecidedProject
 
 DUE DATES
-Proposal                        21:00 Sunday 24 September
-Initial Peer Feedback Stage     21:00 Friday 13 October
-Short Promotion Video           21:00 Friday 27 October
-Final System Demonstration      17:00 Friday 3 November
-Final Video                     21:00 Sunday 5 November
-Final Peer Feedback Optional task: A week after the demo
+1) Proposal                        21:00 Sunday 24 September
+2) Initial Peer Feedback Stage     21:00 Friday 13 October
+3) Short Promotion Video           21:00 Friday 27 October
+4) Final System Demonstration      17:00 Friday 3 November
+5) Final Video                     21:00 Sunday 5 November
+6) Final Peer Feedback Optional task: A week after the demo
 
 SYSTEM REQUIREMENTS
 1) Include 2 robot arms that interact. 1 should be an existing robot arm from the Robotics Toolbox and 1
