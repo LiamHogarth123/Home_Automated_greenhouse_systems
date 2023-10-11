@@ -4,6 +4,12 @@
 spawnEnvironment()
 
 q = [0 0 0 0 0 0 0];
-r = LinearUR5();
-r.model;
-r.model.teach(q)
+% r = LinearUR5();
+% r.model;
+% r.model.teach(q)
+
+
+% x = SpawnLinearUR5(q);
+
+
+spawnTest(q);
