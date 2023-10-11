@@ -3,13 +3,20 @@
 % spawn the static environment
 spawnEnvironment()
 
-q = [0 0 0 0 0 0 0];
+q = [0 0 100 0 0 0 0];
 % r = LinearUR5();
 % r.model;
-% r.model.teach(q)
+% % r.model.teach(q)
+% r.model.animate(q);
+% drawnow();
 
 
-% x = SpawnLinearUR5(q);
+
+% spawnLinearUR5();
+
+% spawnTest(q);
 
 
-spawnTest(q);
+% myRobot = SpawnLinearUR5();
+% % myRobot.spawnLinearUR5();
+% myRobot.moveRobot(q);
