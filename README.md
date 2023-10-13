@@ -1,4 +1,21 @@
-# Industrial_Robotics_UndecidedProject
+# Industrial Robotics Autonomous Greenhouse systems.
+
+Group memebers
+Daniel Chen
+Jonah Mann
+Liam Hogarth
+
+
+# Project Description
+Our Chosen project is an Autonomous greenhouse system that will manage and a greenhouse provide fresh produce to a community. The two robots will interact taking a plant from a greenhouse shelving unit and then delivering the plant to the second robot. The Second Robot Waters and inspect the quality of the plant in case it needs fertiliser.
+
+
+Robot 1 - Linear Ur5
+![183264-13204725](https://github.com/LiamHogarth123/Home_Automated_greenhouse_systems/assets/126121211/f1ca663e-6fd4-4861-b8ab-58282a861561)
+
+Robot 2 - A0509
+![Product-Image-2020-07-16T144008 659](https://github.com/LiamHogarth123/Home_Automated_greenhouse_systems/assets/126121211/8425b175-6905-46a5-b915-02b24bc415ad)
+
 
 DUE DATES
 1) Proposal                        21:00 Sunday 24 September
@@ -7,6 +24,7 @@ DUE DATES
 4) Final System Demonstration      17:00 Friday 3 November
 5) Final Video                     21:00 Sunday 5 November
 6) Final Peer Feedback Optional task: A week after the demo
+
 
 SYSTEM REQUIREMENTS
 1) Include 2 robot arms that interact. 1 should be an existing robot arm from the Robotics Toolbox and 1
