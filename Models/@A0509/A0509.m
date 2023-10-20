@@ -12,19 +12,29 @@ classdef A0509 < RobotBaseClass
             if nargin < 1			
 				baseTr = eye(4);				
             end
-            self.model.base = self.model.base.T * baseTr * trotx(pi/2) * troty(pi/2);
+            %self.model.base = self.model.base.T * baseTr * trotx(pi/2) * troty(pi/2);
             
             self.PlotAndColourRobot();         
         end
 
 %% Create the robot model
         function CreateModel(self)
+            % link(1) = Link('d',0,'a',0,'alpha',pi/2,'qlim',[-pi pi],'offset',0);
+            % link(2) = Link('d',0,'a',2,'alpha',0,'qlim',[-pi pi],'offset',0);
+            % link(3) = Link('d',0,'a',0,'alpha',pi/2,'qlim',[-160 160]*pi/180,'offset',0);
+            % link(4) = Link('d',0,'a',1,'alpha',-pi/2,'qlim',[-pi pi],'offset',0);
+            % link(5) = Link('d',0,'a',0,'alpha',pi/2,'qlim',[-pi pi],'offset',0);
+            % link(6) = Link('d',1,'a',0.5,'alpha',0,'qlim',[-pi pi],'offset',0);
+
             link(1) = Link('d',0,'a',0,'alpha',pi/2,'qlim',[-pi pi],'offset',0);
-            link(2) = Link('d',0,'a',2,'alpha',0,'qlim',[-pi pi],'offset',0);
-            link(3) = Link('d',0,'a',0,'alpha',pi/2,'qlim',[-160 160]*pi/180,'offset',0);
-            link(4) = Link('d',0,'a',1,'alpha',-pi/2,'qlim',[-pi pi],'offset',0);
-            link(5) = Link('d',0,'a',0,'alpha',pi/2,'qlim',[-pi pi],'offset',0);
-            link(6) = Link('d',1,'a',0.5,'alpha',0,'qlim',[-pi pi],'offset',0);
+            link(2) = Link('d',0,'a',1,'alpha',0,'qlim',[-pi pi],'offset',pi/2);
+            link(3) = Link('d',0,'a',0,'alpha',pi/2,'qlim',[-160 160]*pi/180,'offset',pi/2);
+            link(4) = Link('d',1,'a',0,'alpha',pi/2,'qlim',[-pi pi],'offset',0);
+            link(5) = Link('d',0,'a',0,'alpha',pi/2,'qlim',[-pi pi],'offset',pi);
+            link(6) = Link('d',0.5,'a',0,'alpha',0,'qlim',[-pi pi],'offset',0);
+
+
+
 
             % UR3e
             % link(1) = Link('d',0.15185,'a',0,'alpha',pi/2,'qlim',deg2rad([-360 360]), 'offset',0);
