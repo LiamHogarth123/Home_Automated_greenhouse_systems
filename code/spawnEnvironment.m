@@ -22,6 +22,7 @@ workspace = [-5 5 -5 5 -5 3]; % creating the workspace
          [0, 2; 0, 2], ...
          'CData',imrotate(imread('brick_wall.jpg'), 90), ...  % Rotate the texture 90 degrees
          'FaceColor','texturemap');
+    
 
 
     
