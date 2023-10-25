@@ -11,6 +11,7 @@ classdef Lab2ClassTest <handle
         i
         Table_Position
         Plant_Position
+        Watering_Can
     end
 
     methods
@@ -29,7 +30,18 @@ classdef Lab2ClassTest <handle
             self.Populate_variables(self)
             
             self.placePlants(self);
-            self.PlacePlantOnTable(self);
+%             self.PlacePlantOnTable(self);
+            self.i = 0;
+            for i=1:size(self.Plant_Position, 1)
+                inital_goal = self.Plant_Position(i,:);
+                final_goal = self.Table_Position(i,:);
+                self.PlaceOnePlantOnTable(self, inital_goal,final_goal, i)
+                watering_can_position = [0.25, 0.15, 0.5];
+                self.waterPlant(self, watering_can_position, final_goal)
+                self.PlaceOnePlantOnTable(self, final_goal,inital_goal, i)
+%                
+            end
+
            
 
         end
@@ -50,9 +62,13 @@ classdef Lab2ClassTest <handle
             %place object function
             
             for i= 1:size(self.Plant_Position, 1)
-                self.Plants(i) = trisurf(f,v(:,1)+ self.Plant_Position(i,1),v(:,2)+ self.Plant_Position(i,2), v(:,3) +self.Plant_Position(i,3)...
-                    ,'FaceVertexCData',vertexColours,'EdgeColor','interp','EdgeLighting','flat');
+%                 
+%                 self.Plants(i) = trisurf(f,v(:,1)+ self.Plant_Position(i,1),v(:,2)+ self.Plant_Position(i,2), v(:,3) +self.Plant_Position(i,3)...
+%                     ,'FaceVertexCData',vertexColours,'EdgeColor','interp','EdgeLighting','flat');
+                self.Plants(i) = PlaceObject(['Plant.ply'], [self.Plant_Position(i,:)]);
             end
+            self.Watering_Can = PlaceObject(['HalfSizedRedGreenBrick.ply'], [0.25, 0.15, 0.5])
+
             camlight;
             hold on;
         end
@@ -60,30 +76,101 @@ classdef Lab2ClassTest <handle
    
 
 
-        function PlacePlantOnTable(self)
-            %% placing bricks on table
-            
-            offset = 0;
-            steps = 50;
-    
+        
+
+        function PlaceOnePlantOnTable(self, inital_goal, Final_goal, i)
+            %% placing plants on table
+                offset = 0;
+                
+         
+                inital_goal(3) = inital_goal(3) + offset;             
+                Final_goal(3) = Final_goal(3) + offset;
+                current_position = self.robot1.model.getpos();
+                rest_goal = Final_goal(1) -0.4;
+                
+                
+              
+                
+                %finds the required step to animate the robot
+                GetplantTraj = self.Calcjtraj(self, current_position, inital_goal, 1);
+                inital_goal = self.robot1.model.ikcon(transl(inital_goal));
+                DelivPlant = self.Calcjtraj(self, inital_goal, Final_goal, 1);
+                Final_goal = self.robot1.model.ikcon(transl(Final_goal));
+                rest = self.Calcjtraj(self, Final_goal, rest_goal, 1);
+                Movenment = [GetplantTraj;DelivPlant;rest];
+         
+
+                %loops through animation
+                for j = 1:size(Movenment,1)
+                    Plant_trajectory = Movenment(j,:);
+                    for k = 1:size(Plant_trajectory,1)
+                        x = Plant_trajectory(k,:);
+                        self.robot1.model.animate(x);
+                        pause(0.25);
+                        if j > 50 && j < 100
+                            delete(self.Plants(i))
+                            [f,v,data] = plyread('Plant.ply','tri');
+                            
+                            % Scale the colours to be 0-to-1 (they are originally 0-to-255
+                            vertexColours = [data.vertex.red, data.vertex.green, data.vertex.blue] / 255;
+                            BrickVectCount = size(v,1);
+                            hold on;
+                            %place object function
+                                        
+                                        
+                                             
+                            
+
+                            RobotEndeffector = self.robot1.model.fkine(x).t;
+                            RobotEndeffector = RobotEndeffector';
+                            self.Plants(i) = PlaceObject('Plant.ply', RobotEndeffector);
+                           
+                            drawnow()
+                            
+                        end
+                        j
+                      
+                        
+                          
+                    end
+                   
+                    
+
+              
+                end
+                delete(self.Plants(i))
+                self.Plants(i) = PlaceObject('Plant.ply', [Final_goal]);
+                
+
+            % ---------------------------------------------------------------------------------------
+                
+                
+                 
+                [f,v,data] = plyread('Plant.ply','tri');
+                vertexColours = [data.vertex.red, data.vertex.green, data.vertex.blue] / 255;
+                Final_goal(3) = Final_goal(3) - offset;
+                self.Plants(i) = trisurf(f,v(:,1)+ Final_goal(1),v(:,2)+ Final_goal(2), v(:,3) +Final_goal(3)...
+                    ,'FaceVertexCData',vertexColours,'EdgeColor','interp','EdgeLighting','flat');
+        end
+        
 
 
-            
-            for i= 1:size(self.Plant_Position, 1)
-                %%get brick -----------------------------------------------------
 
-                %stores the current brick's position while adding a offset for the
-                Current_Plant = self.Plant_Position(i,:);
-                Current_Plant(3) = Current_Plant(3) + offset;
+        function waterPlant(self, inital_goal, Final_goal)
+            %% placing plants on table
+                offset = 0;
+                steps = 50;
+           
+                inital_goal(3) = inital_goal(3) + offset;
         
                 %reads the current position
-                current_position = self.robot1.model.getpos();
+                current_position = self.robot2.model.getpos();
                 
                 %calculates the required translation
-                requiredTranslation = transl(Current_Plant) * troty(90,'deg')* trotx(90,'deg');
+                requiredTranslation = transl(inital_goal) * troty(90,'deg')* trotx(90,'deg');
         
                 %caclutes the required q angles for the final position
-                PlantInverseKnimatics = self.robot1.model.ikcon(requiredTranslation, current_position);
+                PlantInverseKnimatics = self.robot2.model.ikcon(requiredTranslation, current_position);
                 
                 %finds the required step to animate the robot
                 Plant_trajectory = jtraj(current_position, PlantInverseKnimatics, steps);
@@ -91,31 +178,22 @@ classdef Lab2ClassTest <handle
                 %loops through animation
                 for j = 1:size(Plant_trajectory,1)
                     x = Plant_trajectory(j,:);
-                    self.robot1.model.animate(x);
+                    self.robot2.model.animate(x);
                     pause(0.1);
               
                 end
-        
-                %deletes the brick from the start position to prepare for it to
-                %move with the ar,
-                
 %                 delete(self.Plants(i))
-                
-                
-           
-        
+
             % ---------------------------------------------------------------------------------------
                 %This section deliever the plant to the table position
-              
+
                 %updates the current position
                 current_position = self.robot1.model.getpos();
-            
-                %updates the internal variable for the final position with offset
-                Goal = self.Table_Position(i,:);
-                Goal(3) = Goal(3) + offset;
+
+                Final_goal(3) = Final_goal(3) + offset;
         
                 %calculate the translation, invserse kinematics, and trajectory
-                requiredTranslation = transl(Goal) * troty(90,'deg')*trotx(90,'deg');
+                requiredTranslation = transl(Final_goal) * troty(90,'deg')*trotx(90,'deg');
                 PlantInverseKnimatics = self.robot1.model.ikcon(requiredTranslation, current_position);
                 Brick_trajectory = jtraj(current_position, PlantInverseKnimatics, steps);
                 
@@ -124,63 +202,74 @@ classdef Lab2ClassTest <handle
                     x = Brick_trajectory(k,:);
                     self.robot1.model.animate(x);
                     pause(0.25);
-        
-              
-                    %
-%                     Brick_pose = robot.model.fkine(Brick_trajectory(k,:));
-%                     Brick_pose.t(3) = Brick_pose.t(3) - brickoffset;
-%                     delete(Plants(i))
-                    
+
+%                     delete(self.Plants(i))
+                 
                     drawnow();  
                 
-        %       % cow method -----------
-        %             cow.cowModel{1}.base = robot.model.fkine(robot.model.getpos());
-        %             cow.cowModel{1}.animate(0);
-        %             drawnow();
-        
+
           
                 end
                 
                  
-                [f,v,data] = plyread('Plant.ply','tri');
+                [f,v,data] = plyread('HalfSizedRedGreenBrick.ply','tri');
                 vertexColours = [data.vertex.red, data.vertex.green, data.vertex.blue] / 255;
-                Goal = self.Table_Position(i,:);
-                trisurf(f,v(:,1)+ Goal(1),v(:,2)+ Goal(2), v(:,3) +Goal(3)...
+                Final_goal(3) = Final_goal(3) - offset;
+                self.Watering_Can = trisurf(f,v(:,1)+ Final_goal(1),v(:,2)+ Final_goal(2), v(:,3) +Final_goal(3)...
                     ,'FaceVertexCData',vertexColours,'EdgeColor','interp','EdgeLighting','flat');
             end
 
 
-        end
         
-        function Populate_variables(self)
-            self.Table_Position = zeros(6,3);
-            self.Plant_Position = zeros(6,3);
-            
-            self.Plant_Position(1,:) =[0.12,0.6, 0.3];
-            self.Plant_Position(2,:) =[0.02, 0.6, 0.3];
-            self.Plant_Position(3,:) =[-0.1,0.6,0.3];
-            self.Plant_Position(4,:) =[-0.2, 0.6, 0.3];
-            self.Plant_Position(5,:) =[-0.3, 0.6, 0.3];
-            self.Plant_Position(6,:) =[-0.4, 0.6, 0.3];
-            self.Plant_Position(7,:) =[-0.5,0.6,0.6];
-            self.Plant_Position(8,:) =[-0.6,0.6,0.6];
-            self.Plant_Position(9,:) =[-0.7,0.6,0.6];
 
-            
-            self.Table_Position(1,:) =[0.25, 0.15, 0.5];
-            self.Table_Position(2,:) =[0.25, 0,0.5];
-            self.Table_Position(3,:) =[0.25,-0.15,0.5];
-            self.Table_Position(4,:) =[0.25,0.15,0.525];
-            self.Table_Position(5,:) =[0.25,0,0.525];
-            self.Table_Position(6,:) =[0.25,-0.15,0.525];
-            self.Table_Position(7,:) =[0.25,0.15,0.55];
-            self.Table_Position(8,:) =[0.25,0,0.55];
-            self.Table_Position(9,:) =[0.25,-0.15,0.55]; 
 
-            
-            
+       
+
+
+
+        
+        
+            function Populate_variables(self)
+                self.Table_Position = zeros(6,3);
+                self.Plant_Position = zeros(6,3);
+                
+                self.Plant_Position(1,:) =[0.12,0.6, 0.3];
+                self.Plant_Position(2,:) =[0.02, 0.6, 0.3];
+                self.Plant_Position(3,:) =[-0.1,0.6,0.3];
+                self.Plant_Position(4,:) =[-0.2, 0.6, 0.3];
+                self.Plant_Position(5,:) =[-0.3, 0.6, 0.3];
+                self.Plant_Position(6,:) =[-0.4, 0.6, 0.3];
+                self.Plant_Position(7,:) =[-0.5,0.6,0.6];
+                self.Plant_Position(8,:) =[-0.6,0.6,0.6];
+                self.Plant_Position(9,:) =[-0.7,0.6,0.6];
+    
+                
+                self.Table_Position(1,:) =[0.25, 0.15, 0.5];
+                self.Table_Position(2,:) =[0.25, 0,0.5];
+                self.Table_Position(3,:) =[0.25,-0.15,0.5];
+                self.Table_Position(4,:) =[0.25,0.15,0.525];
+                self.Table_Position(5,:) =[0.25,0,0.525];
+                self.Table_Position(6,:) =[0.25,-0.15,0.525];
+                self.Table_Position(7,:) =[0.25,0.15,0.55];
+                self.Table_Position(8,:) =[0.25,0,0.55];
+                self.Table_Position(9,:) =[0.25,-0.15,0.55]; 
+
+            end
+
+            function [trajectory] = Calcjtraj(self, start, finish, robot)
+    
+                steps = 50;
+
+                requiredTranslation = transl(finish) * troty(90,'deg')*trotx(90,'deg');
+                if robot == 2
+                    PlantInverseKnimatics = self.robot2.model.ikcon(requiredTranslation, start);
+                else
+                    PlantInverseKnimatics = self.robot1.model.ikcon(requiredTranslation, start);
+                end
+                trajectory = jtraj(start, PlantInverseKnimatics, steps);
+                
+            end
 
         end
 
     end
-end
