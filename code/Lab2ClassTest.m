@@ -39,6 +39,8 @@ classdef Lab2ClassTest <handle
         wateringCanVertices
         updatedWateringCanVerts
         endwateringCans
+        waterCan
+        waterCans
         
     end
 
@@ -57,9 +59,11 @@ classdef Lab2ClassTest <handle
             
             
             %A0509 initialisation
-            baseTr = [1,0,0,1; 0,1,0,-0.5; 0,0,1,0.5; 0,0,0,1];
+            baseTr = [1,0,0,1; 0,1,0,-0.5; 0,0,1,0.55; 0,0,0,1];
             self.robot2 = A0509(baseTr);
-            self.robot2.model.base = self.robot2.model.base.T * trotz(pi);
+            % self.robot2.model.base = self.robot2.model.base.T * trotz(pi);
+            % self.robot2.PlotAndColourRobot();
+            drawnow()
             
             %drawnow()
 %             self.A0509Grip = A0509_Gripper;
@@ -76,7 +80,7 @@ classdef Lab2ClassTest <handle
         
                 self.PlaceOnePlantOnTable(self, inital_goal,final_goal, i)
                 % watering_can_position = [0.25, 0.15, 0.5];
-%                 self.waterPlant(self)
+                self.waterPlant(self, i)
                 self.PlaceOnePlantOnTable(self, final_goal,inital_goal, i)
 %                
             end
@@ -106,13 +110,15 @@ classdef Lab2ClassTest <handle
                 transform = [self.plantVertices,ones(size(self.plantVertices,1),1)] * transl(self.plants(i,:))';
                 set(self.plantObjects{i},'Vertices',transform(:,1:3));
             end
-
-
-                self.wateringCanObjects = PlaceObject('Watering_can.ply'); % Placing plants into world
-                self.wateringCanVertices = get(self.wateringCanObjects,'Vertices');
-                transform = [self.wateringCanVertices,ones(size(self.wateringCanVertices,1),1)] * transl([0.75, -0.4, 0.5+0.05])';
-                set(self.wateringCanObjects,'Vertices',transform(:,1:3));
             
+            self.wateringCanObjects = cell(1,1);
+            %self.wateringCanObjects = PlaceObject('Watering_can.ply',[1, -1.2, 0.5+0.05]); % Placing plants into world
+            self.wateringCanObjects{1} = PlaceObject('Watering_can.ply');
+            self.wateringCanVertices = get(self.wateringCanObjects{1},'Vertices');
+            %self.wateringCanVertices = [get(self.wateringCanObjects,'Vertices'), ones(size(get(self.wateringCanObjects,'Vertices'),1),1)] * trotz(pi/2);
+            transform = [self.wateringCanVertices,ones(size(self.wateringCanVertices,1),1)] * transl(self.waterCan)';
+            %set(self.wateringCanObjects,'Vertices',self.wateringCanVertices(:,1:3));
+            set(self.wateringCanObjects{1},'Vertices',transform(:,1:3));
         end
 
    
@@ -177,18 +183,43 @@ classdef Lab2ClassTest <handle
 
                     animateRobot(self.Jtraj_finish_rest,self.robot1);
                     pause(0.5)
-               
+                %end
+                % qPath = jtraj(r.model.getpos,q0,50); % Resets position for final movement
+                % animateRobot(qPath,r);
+
+                %loops through animation
+                % for j = 1:size(movement,1)
+                %     Plant_trajectory = movement(j,:)
+                %     for k = 1:size(Plant_trajectory,1)
+                %         x = Plant_trajectory(k,:);
+                %         self.robot1.model.animate(x);
+                %         pause(0.25);
+                %         if j > 50 && j < 100
+                %             delete(self.Plants(i))
+                %             RobotEndeffector = (self.robot1.model.fkine(x).t)';
+                %             self.Plants(i) = PlaceObject('Plant.ply', RobotEndeffector);                           
+                %             drawnow()
+                % 
+                %         end
+                %         j                                                                       
+                %     end                                                   
+                % end
+                % delete(self.Plants(i))
+                % self.Plants(i) = PlaceObject('Plant.ply', Final_goal);
+                % delete(self.Plants(i))
+                % Final_goal(3) = Final_goal(3) - offset;
+                % self.Plants(i) = PlaceObject('Plant.ply', Final_goal);
 
         end
         
 
 
 
-       function waterPlant(self)
+        function waterPlant(self, count)
             % wateringPos1 = [0.75, -0.4, 0.5+0.05];
             % wateringPos2 = [0.75,  0,   0.5+0.05];
             % watering = [wateringPos1; wateringPos2; wateringPos1; wateringPos2; wateringPos1; wateringPos2];
-            
+            q0 = [0,0,0,0,0,0];
             wateringPoses = zeros(6,6);
             %shelfPoses = zeros(9,6);
             for i=1:size(self.watering)
@@ -197,20 +228,54 @@ classdef Lab2ClassTest <handle
             end
             
             axis([-2,2,-2,2,0,2])
-            
-            for i=1:size(wateringPoses)
-                qPath = jtraj(self.robot2.model.getpos,wateringPoses(i,:),100); % Creates path of robot current pos to brick at index i
-                for j=1:size(qPath)
-                    self.robot2.model.animate(qPath(j,:));
-        
-                    drawnow();
-                end
 
-                pos = transl(self.robot2.model.fkine(self.robot2.model.getpos));
-                %fkine = aR.model.fkine(aR.model.getpos);
-                %translate = transl(fkine)
+            if count == 1
+                waterCanPose = self.robot2.model.ikcon(transl(self.waterCan)*trotz(pi))
+                qPath = jtraj(self.robot2.model.getpos,waterCanPose,100);
+                animateRobot(qPath,self.robot2);
                 pause(0.5)
+                %self.i = self.i + 1;
             end
+            
+            qPath = jtraj(self.robot2.model.getpos,q0,50);
+            for j=1:size(qPath)
+                self.robot2.model.animate(qPath(j,:)) 
+                tr = self.robot2.model.fkine(self.robot2.model.getpos).T;
+                tr = tr * trotx(-pi/2);
+                self.updatedWateringCanVerts = [self.wateringCanVertices,ones(size(self.wateringCanVertices,1),1)] * tr';
+                set(self.wateringCanObjects{1},'Vertices',self.updatedWateringCanVerts(:,1:3)); % Updates can position to end effector transform
+                drawnow();
+            end
+            pause(0.5);
+            
+            qPath = jtraj(self.robot2.model.getpos,wateringPoses(count,:),100); % Creates path of robot current pos to brick at index i
+            for j=1:size(qPath)
+                self.robot2.model.animate(qPath(j,:)) 
+                tr = self.robot2.model.fkine(self.robot2.model.getpos).T;
+                tr = tr * trotx(-pi/2);
+                self.updatedWateringCanVerts = [self.wateringCanVertices,ones(size(self.wateringCanVertices,1),1)] * tr';
+                set(self.wateringCanObjects{1},'Vertices',self.updatedWateringCanVerts(:,1:3)); % Updates can position to end effector transform
+                drawnow();
+            end
+
+            % %for i=1:size(wateringPoses)
+            %     qPath = jtraj(self.robot2.model.getpos,wateringPoses(count,:),100); % Creates path of robot current pos to brick at index i
+            %     % for j=1:size(qPath)
+            %     %     self.robot2.model.animate(qPath(j,:));
+            %     % 
+            %     %     drawnow();
+            %     % end
+            %     animateRobot(qPath,self.robot2);
+            %     pause(0.5);
+            % 
+            %     qPath = jtraj(self.robot2.model.getpos,q0,50);
+            %     animateRobot(qPath,self.robot2);
+            % 
+            %     pos = transl(self.robot2.model.fkine(self.robot2.model.getpos));
+            %     %fkine = aR.model.fkine(aR.model.getpos);
+            %     %translate = transl(fkine)
+            %     pause(0.5)
+            % %end
         end
 
         
@@ -248,20 +313,22 @@ classdef Lab2ClassTest <handle
                 self.plants = [self.plant1;self.plant2;self.plant3;self.plant4;self.plant5;self.plant6];%;self.plant7;self.plant8;self.plant9];
     
                 
-                self.Table_Position(1,:) =[0.2, 0.15, 0.5];
-                self.Table_Position(2,:) =[0.2, 0,0.5];
-                self.Table_Position(3,:) =[0.2,-0.15,0.5];
-                self.Table_Position(4,:) =[0.2,0.15,0.525];
-                self.Table_Position(5,:) =[0.2,0,0.525];
-                self.Table_Position(6,:) =[0.2,-0.15,0.525];
+                self.Table_Position(1,:) =[0.25, 0.15, 0.5];
+                self.Table_Position(2,:) =[0.25, 0,0.5];
+                self.Table_Position(3,:) =[0.25,-0.15,0.5];
+                self.Table_Position(4,:) =[0.25,0.15,0.525];
+                self.Table_Position(5,:) =[0.25,0,0.525];
+                self.Table_Position(6,:) =[0.25,-0.15,0.525];
                 self.Table_Position(7,:) =[0.25,0.15,0.55];
                 self.Table_Position(8,:) =[0.25,0,0.55];
                 self.Table_Position(9,:) =[0.25,-0.15,0.55];
 
-                self.wateringPos1 = [0.1, -0.4, 0.5+0.05];
-                self.wateringPos2 = [0.1,  0.1,   0.5+0.05];
+                self.wateringPos1 = [0.5, -0.4, 0.5+0.05];
+                self.wateringPos2 = [0.5,  0.1,   0.5+0.05];
                 self.watering = [self.wateringPos1; self.wateringPos2; self.wateringPos1; self.wateringPos2; self.wateringPos1; self.wateringPos2];
-
+                
+                self.waterCan = [0.7, -1, 0.5+0.05];%[1, -1.2, 0.5+0.05];
+                self.waterCans = [self.waterCan];
             end
 
 
@@ -270,7 +337,6 @@ classdef Lab2ClassTest <handle
                 rest = finish;
                 rest(3) = rest(3)+0.5;
                 steps = 50;
-                mask = [1,1,1,1,1,0];
                 if robot == 2
                     
                     qinital = self.robot2.model.ikcon(transl(CurrentPosition)*trotx(pi)); % uses ikcon to get joint angles and prevent collision. multiplied by trotx(pi) to rotate end-effector
@@ -279,16 +345,10 @@ classdef Lab2ClassTest <handle
                     qrest = self.robot2.model.ikcon(transl(rest)*trotx(pi/2));                   
                     
                 else
-                    qinital = self.robot1.model.ikine(transl(CurrentPosition)*trotx(pi/2)*troty(pi/2), mask, 'forceSoln'); % uses ikcon to get joint angles and prevent collision. multiplied by trotx(pi) to rotate end-effector
-                    qstart = self.robot1.model.ikine(transl(start)*trotx(pi/2)*troty(pi/2), mask, 'forceSoln'); % uses ikcon to get joint angles and prevent collision. multiplied by trotx(pi) to rotate end-effector
-                    qfinish = self.robot1.model.ikine(transl(finish)*trotx(pi/2)*troty(pi/2), mask, 'forceSoln');
-                    qrest = self.robot1.model.ikine(transl(rest)*trotx(pi/2)*troty(pi/2), mask, 'forceSoln');
-                    qrest = [0,0,0,0,0,0,0];
-                    
-%                     qinital = self.robot1.model.ikcon(transl(CurrentPosition)*trotx(pi/2)*troty(pi/2));
-%                     qstart = self.robot1.model.ikcon(transl(start)*trotx(pi/2)*troty(pi/2)); % uses ikcon to get joint angles and prevent collision. multiplied by trotx(pi) to rotate end-effector
-%                     qfinish = self.robot1.model.ikcon(transl(finish)*trotx(pi/2)*troty(pi/2));
-%                     qrest = self.robot1.model.ikcon(transl(rest)*trotx(pi/2)*troty(pi/2));
+                    qinital = self.robot1.model.ikcon(transl(CurrentPosition)*trotx(pi/2)*troty(pi/2)); % uses ikcon to get joint angles and prevent collision. multiplied by trotx(pi) to rotate end-effector
+                    qstart = self.robot1.model.ikcon(transl(start)*trotx(pi/2)*troty(pi/2)); % uses ikcon to get joint angles and prevent collision. multiplied by trotx(pi) to rotate end-effector
+                    qfinish = self.robot1.model.ikcon(transl(finish)*trotx(pi/2)*troty(pi/2));
+                    qrest = self.robot1.model.ikcon(transl(rest)*trotx(pi/2)*troty(pi/2));
 
                 end
                 self.Jtraj_inital_start = jtraj(qinital,qstart,steps);

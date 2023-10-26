@@ -11,7 +11,7 @@ classdef A0509 < RobotBaseClass
             if nargin < 1			
 				baseTr = eye(4);				
             end
-            self.model.base = self.model.base.T * baseTr; %* trotx(pi/2) * troty(pi/2);
+            self.model.base = self.model.base.T * baseTr * trotz(pi); %* trotx(pi/2) * troty(pi/2);
             %self.model.base = transl(0.75, 0.125, 0.3)
             self.PlotAndColourRobot();         
         end
