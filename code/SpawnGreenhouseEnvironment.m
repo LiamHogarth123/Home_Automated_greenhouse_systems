@@ -9,7 +9,6 @@ clear all
 
 %defining the main properities
 
-robot = LinearUR5;
 
 hold on;
 
