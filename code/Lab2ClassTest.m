@@ -170,8 +170,6 @@ classdef Lab2ClassTest <handle
                         set(self.plantObjects{count},'Vertices',self.updatedPlantVerts(:,1:3)); % Updates brick position to end effector transform
                     drawnow();
 
-%                     delete(self.plantObjects{count});
-%                     self.plantObjects{count} = [PlaceObject('Plant.ply',self.watering(i,:))]; % Places plants at hardcoded droppoff locations
                     pos = transl(self.robot1.model.fkine(self.robot1.model.getpos))
                     %disp(['Place plant down at: [', num2str(pos2), '] Moving to: [', num2str(pos3), ']']);
                     pause(0.5)
