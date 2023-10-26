@@ -9,7 +9,6 @@ clear all
 
 %defining the main properities
 
-robot = LinearUR5;
 
 hold on;
 
@@ -27,3 +26,5 @@ house = PlaceObject('GreenHouseLargerNowall.ply', [0,0,0]);
 xlim([-2, 2])
 ylim([-2, 2])
 zlim([0, 2])
+
+camlight;
