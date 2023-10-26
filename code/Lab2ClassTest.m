@@ -209,8 +209,8 @@ classdef Lab2ClassTest <handle
 
 
        function waterPlant(self)
-            wateringPos1 = [0.75, -0.4, 0.5+0.05];
-            wateringPos2 = [0.75,  0,   0.5+0.05];
+            wateringPos1 = [0.25, -0.4, 0.5+0.05];
+            wateringPos2 = [0.25,  0,   0.5+0.05];
             watering = [wateringPos1; wateringPos2; wateringPos1; wateringPos2; wateringPos1; wateringPos2];
             
             wateringPoses = zeros(6,6);
