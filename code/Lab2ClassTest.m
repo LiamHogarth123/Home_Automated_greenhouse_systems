@@ -76,7 +76,7 @@ classdef Lab2ClassTest <handle
         
                 self.PlaceOnePlantOnTable(self, inital_goal,final_goal, i)
                 % watering_can_position = [0.25, 0.15, 0.5];
-                self.waterPlant(self)
+%                 self.waterPlant(self)
                 self.PlaceOnePlantOnTable(self, final_goal,inital_goal, i)
 %                
             end
@@ -177,32 +177,7 @@ classdef Lab2ClassTest <handle
 
                     animateRobot(self.Jtraj_finish_rest,self.robot1);
                     pause(0.5)
-                %end
-                % qPath = jtraj(r.model.getpos,q0,50); % Resets position for final movement
-                % animateRobot(qPath,r);
-
-                %loops through animation
-                % for j = 1:size(movement,1)
-                %     Plant_trajectory = movement(j,:)
-                %     for k = 1:size(Plant_trajectory,1)
-                %         x = Plant_trajectory(k,:);
-                %         self.robot1.model.animate(x);
-                %         pause(0.25);
-                %         if j > 50 && j < 100
-                %             delete(self.Plants(i))
-                %             RobotEndeffector = (self.robot1.model.fkine(x).t)';
-                %             self.Plants(i) = PlaceObject('Plant.ply', RobotEndeffector);                           
-                %             drawnow()
-                % 
-                %         end
-                %         j                                                                       
-                %     end                                                   
-                % end
-                % delete(self.Plants(i))
-                % self.Plants(i) = PlaceObject('Plant.ply', Final_goal);
-                % delete(self.Plants(i))
-                % Final_goal(3) = Final_goal(3) - offset;
-                % self.Plants(i) = PlaceObject('Plant.ply', Final_goal);
+               
 
         end
         
@@ -273,18 +248,18 @@ classdef Lab2ClassTest <handle
                 self.plants = [self.plant1;self.plant2;self.plant3;self.plant4;self.plant5;self.plant6];%;self.plant7;self.plant8;self.plant9];
     
                 
-                self.Table_Position(1,:) =[0.25, 0.15, 0.5];
-                self.Table_Position(2,:) =[0.25, 0,0.5];
-                self.Table_Position(3,:) =[0.25,-0.15,0.5];
-                self.Table_Position(4,:) =[0.25,0.15,0.525];
-                self.Table_Position(5,:) =[0.25,0,0.525];
-                self.Table_Position(6,:) =[0.25,-0.15,0.525];
+                self.Table_Position(1,:) =[0.2, 0.15, 0.5];
+                self.Table_Position(2,:) =[0.2, 0,0.5];
+                self.Table_Position(3,:) =[0.2,-0.15,0.5];
+                self.Table_Position(4,:) =[0.2,0.15,0.525];
+                self.Table_Position(5,:) =[0.2,0,0.525];
+                self.Table_Position(6,:) =[0.2,-0.15,0.525];
                 self.Table_Position(7,:) =[0.25,0.15,0.55];
                 self.Table_Position(8,:) =[0.25,0,0.55];
                 self.Table_Position(9,:) =[0.25,-0.15,0.55];
 
-                self.wateringPos1 = [0.5, -0.4, 0.5+0.05];
-                self.wateringPos2 = [0.5,  0.1,   0.5+0.05];
+                self.wateringPos1 = [0.1, -0.4, 0.5+0.05];
+                self.wateringPos2 = [0.1,  0.1,   0.5+0.05];
                 self.watering = [self.wateringPos1; self.wateringPos2; self.wateringPos1; self.wateringPos2; self.wateringPos1; self.wateringPos2];
 
             end
@@ -295,6 +270,7 @@ classdef Lab2ClassTest <handle
                 rest = finish;
                 rest(3) = rest(3)+0.5;
                 steps = 50;
+                mask = [1,1,1,1,1,0];
                 if robot == 2
                     
                     qinital = self.robot2.model.ikcon(transl(CurrentPosition)*trotx(pi)); % uses ikcon to get joint angles and prevent collision. multiplied by trotx(pi) to rotate end-effector
@@ -303,10 +279,16 @@ classdef Lab2ClassTest <handle
                     qrest = self.robot2.model.ikcon(transl(rest)*trotx(pi/2));                   
                     
                 else
-                    qinital = self.robot1.model.ikcon(transl(CurrentPosition)*trotx(pi/2)*troty(pi/2)); % uses ikcon to get joint angles and prevent collision. multiplied by trotx(pi) to rotate end-effector
-                    qstart = self.robot1.model.ikcon(transl(start)*trotx(pi/2)*troty(pi/2)); % uses ikcon to get joint angles and prevent collision. multiplied by trotx(pi) to rotate end-effector
-                    qfinish = self.robot1.model.ikcon(transl(finish)*trotx(pi/2)*troty(pi/2));
-                    qrest = self.robot1.model.ikcon(transl(rest)*trotx(pi/2)*troty(pi/2));
+                    qinital = self.robot1.model.ikine(transl(CurrentPosition)*trotx(pi/2)*troty(pi/2), mask, 'forceSoln'); % uses ikcon to get joint angles and prevent collision. multiplied by trotx(pi) to rotate end-effector
+                    qstart = self.robot1.model.ikine(transl(start)*trotx(pi/2)*troty(pi/2), mask, 'forceSoln'); % uses ikcon to get joint angles and prevent collision. multiplied by trotx(pi) to rotate end-effector
+                    qfinish = self.robot1.model.ikine(transl(finish)*trotx(pi/2)*troty(pi/2), mask, 'forceSoln');
+                    qrest = self.robot1.model.ikine(transl(rest)*trotx(pi/2)*troty(pi/2), mask, 'forceSoln');
+                    qrest = [0,0,0,0,0,0,0];
+                    
+%                     qinital = self.robot1.model.ikcon(transl(CurrentPosition)*trotx(pi/2)*troty(pi/2));
+%                     qstart = self.robot1.model.ikcon(transl(start)*trotx(pi/2)*troty(pi/2)); % uses ikcon to get joint angles and prevent collision. multiplied by trotx(pi) to rotate end-effector
+%                     qfinish = self.robot1.model.ikcon(transl(finish)*trotx(pi/2)*troty(pi/2));
+%                     qrest = self.robot1.model.ikcon(transl(rest)*trotx(pi/2)*troty(pi/2));
 
                 end
                 self.Jtraj_inital_start = jtraj(qinital,qstart,steps);
