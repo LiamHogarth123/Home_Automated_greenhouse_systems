@@ -217,35 +217,36 @@ classdef Lab2ClassTest <handle
             wateringPoses = zeros(6,6);
             %shelfPoses = zeros(9,6);
             for i=1:size(self.watering)
-                wateringPoses(i,:) = self.robot2.model.ikcon(transl(self.watering(i,:))*trotx(pi));
+                wateringPoses(i,:) = self.robot2.model.ikcon(transl(self.watering(i,:))*trotx(pi));%*troty(-pi/2)); %*trotx(pi));
                 %shelfPoses(i,:) = r.model.ikcon(transl(e.endBricks(i,:))*trotx(pi));
             end
             
             axis([-2,2,-2,2,0,2])
 
             if count == 1
-                waterCanPose = self.robot2.model.ikcon(transl(self.waterCan)*trotz(pi/2)*troty(pi/2))
+                waterCanPose = self.robot2.model.ikcon(transl(self.waterCan)*trotz(-pi/2)*troty(pi/2))
                 qPath = jtraj(self.robot2.model.getpos,waterCanPose,100);
                 animateRobot(qPath,self.robot2);
                 pause(0.5)
                 
                 qPath = jtraj(self.robot2.model.getpos,q0,50);
                 for j=1:size(qPath)
-                    self.robot2.model.animate(qPath(j,:)) 
+                    self.robot2.model.animate(qPath(j,:))
                     tr = self.robot2.model.fkine(self.robot2.model.getpos).T;
-                    tr = tr * trotx(-pi/2);
+                    tr = tr * troty(-pi/2) * trotz(pi/2); %trotx(-pi/2);
                     self.updatedWateringCanVerts = [self.wateringCanVertices,ones(size(self.wateringCanVertices,1),1)] * tr';
                     set(self.wateringCanObjects{1},'Vertices',self.updatedWateringCanVerts(:,1:3)); % Updates can position to end effector transform
                     drawnow();
                 end
                 pause(0.5);
             end
-            
+
             qPath = jtraj(self.robot2.model.getpos,wateringPoses(count,:),100); % Creates path of robot current pos to brick at index i
             for j=1:size(qPath)
                 self.robot2.model.animate(qPath(j,:)) 
                 tr = self.robot2.model.fkine(self.robot2.model.getpos).T;
-                tr = tr * trotx(-pi/2);
+                % tr = tr * trotx(-pi/2);
+                tr = tr * troty(-pi/2) * trotz(pi/2); % undo the pose translation in reverse. ie watercanpose was z,y, so undo with -y,-z
                 self.updatedWateringCanVerts = [self.wateringCanVertices,ones(size(self.wateringCanVertices,1),1)] * tr';
                 set(self.wateringCanObjects{1},'Vertices',self.updatedWateringCanVerts(:,1:3)); % Updates can position to end effector transform
                 drawnow();
@@ -256,7 +257,8 @@ classdef Lab2ClassTest <handle
             for j=1:size(qPath)
                 self.robot2.model.animate(qPath(j,:)) 
                 tr = self.robot2.model.fkine(self.robot2.model.getpos).T;
-                tr = tr * trotx(-pi/2);
+                % tr = tr * trotx(-pi/2);
+                tr = tr * troty(-pi/2) * trotz(pi/2);
                 self.updatedWateringCanVerts = [self.wateringCanVertices,ones(size(self.wateringCanVertices,1),1)] * tr';
                 set(self.wateringCanObjects{1},'Vertices',self.updatedWateringCanVerts(:,1:3)); % Updates can position to end effector transform
                 drawnow();
