@@ -126,90 +126,84 @@ classdef Lab2ClassTest <handle
 
         
 
-        function PlaceOnePlantOnTable(self, inital_goal, Final_goal, i)
+        function PlaceOnePlantOnTable(self, inital_goal, Final_goal, count)
             %% placing plants on table
-                offset = 0;                
-         
-                inital_goal(3) = inital_goal(3) + offset;             
-                Final_goal(3) = Final_goal(3) + offset;
-                current_position = self.robot1.model.getpos();
-                rest_goal = Final_goal(1) -0.4;                
+            offset = 0;
+            
+            inital_goal(3) = inital_goal(3) + offset;             
+            Final_goal(3) = Final_goal(3) + offset;
+            current_position = self.robot1.model.getpos();
+            rest_goal = Final_goal(1) -0.4;                
                 
-%                 %finds the required step to animate the robot
-%                 GetplantTraj = self.Calcjtraj(self, current_position, inital_goal, 1);
-%                 inital_goal = self.robot1.model.ikcon(transl(inital_goal));
-%                 DelivPlant = self.Calcjtraj(self, inital_goal, Final_goal, 1);
-%                 Final_goal = self.robot1.model.ikcon(transl(Final_goal));
-%                 rest = self.Calcjtraj(self, Final_goal, rest_goal, 1);
-%                 Movenment = [GetplantTraj;DelivPlant;rest];
-                current_position = (self.robot1.model.getpos());
-                current_position = (self.robot1.model.fkine(current_position).t)';
+%            %finds the required step to animate the robot
+%            GetplantTraj = self.Calcjtraj(self, current_position, inital_goal, 1);
+%            inital_goal = self.robot1.model.ikcon(transl(inital_goal));
+%            DelivPlant = self.Calcjtraj(self, inital_goal, Final_goal, 1);
+%            Final_goal = self.robot1.model.ikcon(transl(Final_goal));
+%            rest = self.Calcjtraj(self, Final_goal, rest_goal, 1);
+%            Movenment = [GetplantTraj;DelivPlant;rest];
+            current_position = (self.robot1.model.getpos());
+            current_position = (self.robot1.model.fkine(current_position).t)';
 
-                movement = self.CalcjtrajAttempt2(self, current_position, inital_goal, Final_goal, 1);
-                endPlantObjects = [];
+            movement = self.CalcjtrajAttempt2(self, current_position, inital_goal, Final_goal, 1);
+            endPlantObjects = [];
 
-                %for i=1:size(brickPoses)
-                    count = i;
-                                    
-                    %qPath = jtraj(r.model.getpos,brickPoses(i,:),100); % Creates path of robot current pos to brick at index i
-                    animateRobot(self.Jtraj_inital_start,self.robot1); % Steps over the qPath and animates the robot, takes a flag to indicate whether the brick is being picked up
-                    pos = transl(self.robot1.model.fkine(self.robot1.model.getpos))
-                    fkine = self.robot1.model.fkine(self.robot1.model.getpos);
-                    translate = transl(fkine)
-                    pause(0.5)
-                
-                    %qPath = jtraj(r.model.getpos,wallPoses(i,:),100); % Creates path of robot current pos (previous brick start) to dropoff point at index i
-                    % animateRobot(qPath,r);
-                    for j=1:size(self.Jtraj_start_finish)
-                        self.robot1.model.animate(self.Jtraj_start_finish(j,:));
-
-                        tr = self.robot1.model.fkine(self.robot1.model.getpos).T;
-                        tr = tr * trotx(-pi/2);
-                        self.updatedPlantVerts = [self.plantVertices,ones(size(self.plantVertices,1),1)] * tr';
-                        set(self.plantObjects{count},'Vertices',self.updatedPlantVerts(:,1:3)); % Updates brick position to end effector transform
-                        drawnow();
-                    end
-                    disp(' ');
-                    disp(['Current joint values: [', num2str(self.Jtraj_start_finish(i,:)), ']']); % Prints joint values after finishing motion
-                    
+            %for i=1:size(brickPoses)
+                %count = i;                    
+                %qPath = jtraj(r.model.getpos,brickPoses(i,:),100); % Creates path of robot current pos to brick at index i
+                animateRobot(self.Jtraj_inital_start,self.robot1); % Steps over the qPath and animates the robot, takes a flag to indicate whether the brick is being picked up
+                pos = transl(self.robot1.model.fkine(self.robot1.model.getpos))
+                fkine = self.robot1.model.fkine(self.robot1.model.getpos);
+                translate = transl(fkine)
+                pause(0.5);
+            
+                %qPath = jtraj(r.model.getpos,wallPoses(i,:),100); % Creates path of robot current pos (previous brick start) to dropoff point at index i
+                % animateRobot(qPath,r);
+                for j=1:size(self.Jtraj_start_finish)
+                    self.robot1.model.animate(self.Jtraj_start_finish(j,:));
+                    tr = self.robot1.model.fkine(self.robot1.model.getpos).T;
+                    tr = tr * trotx(-pi/2);
                     self.updatedPlantVerts = [self.plantVertices,ones(size(self.plantVertices,1),1)] * tr';
                     set(self.plantObjects{count},'Vertices',self.updatedPlantVerts(:,1:3)); % Updates brick position to end effector transform
-                    %endPlantObjects(:,end+1) = [PlaceObject('Plant.ply',self.watering(i,:))];
                     drawnow();
-
-                    pos = transl(self.robot1.model.fkine(self.robot1.model.getpos))
-                    %disp(['Place plant down at: [', num2str(pos2), '] Moving to: [', num2str(pos3), ']']);
-                    pause(0.5)
-
-                    animateRobot(self.Jtraj_finish_rest,self.robot1);
-                    pause(0.5)
-                %end
-                % qPath = jtraj(r.model.getpos,q0,50); % Resets position for final movement
-                % animateRobot(qPath,r);
-
-                %loops through animation
-                % for j = 1:size(movement,1)
-                %     Plant_trajectory = movement(j,:)
-                %     for k = 1:size(Plant_trajectory,1)
-                %         x = Plant_trajectory(k,:);
-                %         self.robot1.model.animate(x);
-                %         pause(0.25);
-                %         if j > 50 && j < 100
-                %             delete(self.Plants(i))
-                %             RobotEndeffector = (self.robot1.model.fkine(x).t)';
-                %             self.Plants(i) = PlaceObject('Plant.ply', RobotEndeffector);                           
-                %             drawnow()
-                % 
-                %         end
-                %         j                                                                       
-                %     end                                                   
-                % end
-                % delete(self.Plants(i))
-                % self.Plants(i) = PlaceObject('Plant.ply', Final_goal);
-                % delete(self.Plants(i))
-                % Final_goal(3) = Final_goal(3) - offset;
-                % self.Plants(i) = PlaceObject('Plant.ply', Final_goal);
-
+                end
+                disp(' ');
+                disp(['Current joint values: [', num2str(self.Jtraj_start_finish(count,:)), ']']); % Prints joint values after finishing motion
+                
+                self.updatedPlantVerts = [self.plantVertices,ones(size(self.plantVertices,1),1)] * tr';
+                set(self.plantObjects{count},'Vertices',self.updatedPlantVerts(:,1:3)); % Updates brick position to end effector transform
+                %endPlantObjects(:,end+1) = [PlaceObject('Plant.ply',self.watering(i,:))];
+                drawnow();
+                pos = transl(self.robot1.model.fkine(self.robot1.model.getpos))
+                pause(0.5);
+                %disp(['Place plant down at: [', num2str(pos2), '] Moving to: [', num2str(pos3), ']']);
+                animateRobot(self.Jtraj_finish_rest,self.robot1);
+                pause(0.5);
+            %end
+            % qPath = jtraj(r.model.getpos,q0,50); % Resets position for final movement
+            % animateRobot(qPath,
+            %loops through animation
+            % for j = 1:size(movement,1)
+            %     Plant_trajectory = movement(j,:)
+            %     for k = 1:size(Plant_trajectory,1)
+            %         x = Plant_trajectory(k,:);
+            %         self.robot1.model.animate(x);
+            %         pause(0.25);
+            %         if j > 50 && j < 100
+            %             delete(self.Plants(i))
+            %             RobotEndeffector = (self.robot1.model.fkine(x).t)';
+            %             self.Plants(i) = PlaceObject('Plant.ply', RobotEndeffector);                           
+            %             drawnow()
+            % 
+            %         end
+            %         j                                                                       
+            %     end                                                   
+            % end
+            % delete(self.Plants(i))
+            % self.Plants(i) = PlaceObject('Plant.ply', Final_goal);
+            % delete(self.Plants(i))
+            % Final_goal(3) = Final_goal(3) - offset;
+            % self.Plants(i) = PlaceObject('Plant.ply', Final_goal);
         end
         
 
@@ -234,19 +228,18 @@ classdef Lab2ClassTest <handle
                 qPath = jtraj(self.robot2.model.getpos,waterCanPose,100);
                 animateRobot(qPath,self.robot2);
                 pause(0.5)
-                %self.i = self.i + 1;
+                
+                qPath = jtraj(self.robot2.model.getpos,q0,50);
+                for j=1:size(qPath)
+                    self.robot2.model.animate(qPath(j,:)) 
+                    tr = self.robot2.model.fkine(self.robot2.model.getpos).T;
+                    tr = tr * trotx(-pi/2);
+                    self.updatedWateringCanVerts = [self.wateringCanVertices,ones(size(self.wateringCanVertices,1),1)] * tr';
+                    set(self.wateringCanObjects{1},'Vertices',self.updatedWateringCanVerts(:,1:3)); % Updates can position to end effector transform
+                    drawnow();
+                end
+                pause(0.5);
             end
-            
-            qPath = jtraj(self.robot2.model.getpos,q0,50);
-            for j=1:size(qPath)
-                self.robot2.model.animate(qPath(j,:)) 
-                tr = self.robot2.model.fkine(self.robot2.model.getpos).T;
-                tr = tr * trotx(-pi/2);
-                self.updatedWateringCanVerts = [self.wateringCanVertices,ones(size(self.wateringCanVertices,1),1)] * tr';
-                set(self.wateringCanObjects{1},'Vertices',self.updatedWateringCanVerts(:,1:3)); % Updates can position to end effector transform
-                drawnow();
-            end
-            pause(0.5);
             
             qPath = jtraj(self.robot2.model.getpos,wateringPoses(count,:),100); % Creates path of robot current pos to brick at index i
             for j=1:size(qPath)
@@ -257,6 +250,18 @@ classdef Lab2ClassTest <handle
                 set(self.wateringCanObjects{1},'Vertices',self.updatedWateringCanVerts(:,1:3)); % Updates can position to end effector transform
                 drawnow();
             end
+            pause(0.5);
+
+            qPath = jtraj(self.robot2.model.getpos,q0,50);
+            for j=1:size(qPath)
+                self.robot2.model.animate(qPath(j,:)) 
+                tr = self.robot2.model.fkine(self.robot2.model.getpos).T;
+                tr = tr * trotx(-pi/2);
+                self.updatedWateringCanVerts = [self.wateringCanVertices,ones(size(self.wateringCanVertices,1),1)] * tr';
+                set(self.wateringCanObjects{1},'Vertices',self.updatedWateringCanVerts(:,1:3)); % Updates can position to end effector transform
+                drawnow();
+            end
+            pause(0.5);
 
             % %for i=1:size(wateringPoses)
             %     qPath = jtraj(self.robot2.model.getpos,wateringPoses(count,:),100); % Creates path of robot current pos to brick at index i
