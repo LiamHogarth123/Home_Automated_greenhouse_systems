@@ -152,29 +152,29 @@ classdef Lab2ClassTest <handle
                 %count = i;                    
                 %qPath = jtraj(r.model.getpos,brickPoses(i,:),100); % Creates path of robot current pos to brick at index i
                 animateRobot(self.Jtraj_inital_start,self.robot1); % Steps over the qPath and animates the robot, takes a flag to indicate whether the brick is being picked up
-                pos = transl(self.robot1.model.fkine(self.robot1.model.getpos))
-                fkine = self.robot1.model.fkine(self.robot1.model.getpos);
-                translate = transl(fkine)
+                posR1shelf = transl(self.robot1.model.fkine(self.robot1.model.getpos))
+                % fkine = self.robot1.model.fkine(self.robot1.model.getpos);
+                % translateR1 = transl(fkine);
                 pause(0.5);
             
-                %qPath = jtraj(r.model.getpos,wallPoses(i,:),100); % Creates path of robot current pos (previous brick start) to dropoff point at index i
+                %qPath = jtraj(r.model.getpos,wallPoses(i,:),100); % Creates path of robot current pos (previous plant start) to dropoff point at index i
                 % animateRobot(qPath,r);
                 for j=1:size(self.Jtraj_start_finish)
                     self.robot1.model.animate(self.Jtraj_start_finish(j,:));
                     tr = self.robot1.model.fkine(self.robot1.model.getpos).T;
                     tr = tr * trotx(-pi/2);
                     self.updatedPlantVerts = [self.plantVertices,ones(size(self.plantVertices,1),1)] * tr';
-                    set(self.plantObjects{count},'Vertices',self.updatedPlantVerts(:,1:3)); % Updates brick position to end effector transform
+                    set(self.plantObjects{count},'Vertices',self.updatedPlantVerts(:,1:3)); % Updates plant position to end effector transform
                     drawnow();
                 end
                 disp(' ');
                 disp(['Current joint values: [', num2str(self.Jtraj_start_finish(count,:)), ']']); % Prints joint values after finishing motion
                 
                 self.updatedPlantVerts = [self.plantVertices,ones(size(self.plantVertices,1),1)] * tr';
-                set(self.plantObjects{count},'Vertices',self.updatedPlantVerts(:,1:3)); % Updates brick position to end effector transform
+                set(self.plantObjects{count},'Vertices',self.updatedPlantVerts(:,1:3)); % Updates plant position to end effector transform
                 %endPlantObjects(:,end+1) = [PlaceObject('Plant.ply',self.watering(i,:))];
                 drawnow();
-                pos = transl(self.robot1.model.fkine(self.robot1.model.getpos))
+                posR1dropoff = transl(self.robot1.model.fkine(self.robot1.model.getpos))
                 pause(0.5);
                 %disp(['Place plant down at: [', num2str(pos2), '] Moving to: [', num2str(pos3), ']']);
                 animateRobot(self.Jtraj_finish_rest,self.robot1);
