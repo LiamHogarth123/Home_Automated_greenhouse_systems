@@ -166,12 +166,12 @@ classdef Lab2ClassTest <handle
                     end
                     disp(' ');
                     disp(['Current joint values: [', num2str(self.Jtraj_start_finish(i,:)), ']']); % Prints joint values after finishing motion
-                    self.updatedPlantVerts = [self.plantVertices,ones(size(self.plantVertices,1),1)] * tr';
-                        set(self.plantObjects{count},'Vertices',self.updatedPlantVerts(:,1:3)); % Updates brick position to end effector transform
+                    
+                    set(self.plantObjects{count},'Vertices',self.plantVertic(:,1:3)); % Updates brick position to end effector transform
                     drawnow();
 
-%                     delete(self.plantObjects{count});
-%                     self.plantObjects{count} = [PlaceObject('Plant.ply',self.watering(i,:))]; % Places plants at hardcoded droppoff locations
+                    delete(self.plantObjects{count});
+                    self.plantObjects{count} = [PlaceObject('Plant.ply',self.watering(i,:))]; % Places plants at hardcoded droppoff locations
                     pos = transl(self.robot1.model.fkine(self.robot1.model.getpos))
                     %disp(['Place plant down at: [', num2str(pos2), '] Moving to: [', num2str(pos3), ']']);
                     pause(0.5)
@@ -285,7 +285,7 @@ classdef Lab2ClassTest <handle
                 self.Table_Position(9,:) =[0.25,-0.15,0.55];
 
                 self.wateringPos1 = [0.5, -0.4, 0.5+0.05];
-                self.wateringPos2 = [0.5,  0.1,   0.5+0.05];
+                self.wateringPos2 = [0.5,  0,   0.5+0.05];
                 self.watering = [self.wateringPos1; self.wateringPos2; self.wateringPos1; self.wateringPos2; self.wateringPos1; self.wateringPos2];
 
             end
