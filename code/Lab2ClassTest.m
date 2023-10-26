@@ -60,8 +60,9 @@ classdef Lab2ClassTest <handle
                 final_goal = self.watering(i,:);
                 % self.PlaceOnePlantOnTable(self, inital_goal,final_goal, i)
                 self.PlaceOnePlantOnTable(self, inital_goal,final_goal, i)
-                % watering_can_position = [0.25, 0.15, 0.5];
-                % self.waterPlant(self, watering_can_position, final_goal, i)
+                %watering_can_position = [0.25, 0.15, 0.5];
+                self.waterPlant(self);
+               % self.waterPlant(self, watering_can_position, final_goal, i)
 %                 self.PlaceOnePlantOnTable(self, final_goal,inital_goal, i)
 %                
             end
@@ -182,50 +183,35 @@ classdef Lab2ClassTest <handle
 
 
 
-        function waterPlant(self, inital_goal, Final_goal,i)
-           offset = 0;
-                
-         
-                inital_goal(3) = inital_goal(3) + offset;             
-                Final_goal(3) = Final_goal(3) + offset;
-                current_position = self.robot1.model.getpos();
-                rest_goal = Final_goal(1) -0.4;
-                
-                
-              
-                
-                %finds the required step to animate the robot
-                GetplantTraj = self.Calcjtraj(self, current_position, inital_goal, 2); %error here
-                inital_goal = self.robot1.model.ikcon(transl(inital_goal));
-                DelivPlant = self.Calcjtraj(self, inital_goal, Final_goal, 2);
-                Final_goal = self.robot1.model.ikcon(transl(Final_goal));
-                rest = self.Calcjtraj(self, Final_goal, rest_goal, 2);
-                Movenment = [GetplantTraj;DelivPlant;rest];
-         
+       function waterPlant(self)
+            wateringPos1 = [1.75, -0.4, 0.5+0.05];
+            wateringPos2 = [0.75,  0,   0.5+0.05];
+            watering = [wateringPos1; wateringPos2; wateringPos1];
+            
+            wateringPoses = zeros(4,6);
+            %shelfPoses = zeros(9,6);
+            for i=1:size(watering)
+                wateringPoses(i,:) = self.robot2.model.ikcon(transl(watering(i,:))*trotx(pi));
+                %shelfPoses(i,:) = r.model.ikcon(transl(e.endBricks(i,:))*trotx(pi));
+            end
 
-                %loops through animation
-                for j = 1:size(Movenment,1)
-                    Plant_trajectory = Movenment(j,:);
-                    for k = 1:size(Plant_trajectory,1)
-                        x = Plant_trajectory(k,:);
-                        self.robot1.model.animate(x);
-                        pause(0.25);
-                        if j > 50 && j < 100
-                            delete(self.Plants(i))
-                            RobotEndeffector = (self.robot1.model.fkine(x).t)';
-                            self.Plants(i) = PlaceObject('Plant.ply', RobotEndeffector);                           
-                            drawnow()
-                           
-                        end
-                        j                                                                       
-                    end                                                   
+
+            
+            axis([-2,2,-2,2,0,2])
+            
+            for i=1:size(wateringPoses)
+                qPath = jtraj(self.robot2.model.getpos,wateringPoses(i,:),100); % Creates path of robot current pos to brick at index i
+                for j=1:size(qPath)
+                     self.robot2.model.animate(qPath(j,:));
+        
+                    drawnow();
                 end
-                delete(self.Plants(i))
-                self.Plants(i) = PlaceObject('Plant.ply', Final_goal);
-                delete(self.Plants(i))
-                Final_goal(3) = Final_goal(3) - offset;
-                self.Plants(i) = PlaceObject('Plant.ply', Final_goal);
 
+                pos = transl(self.robot2.model.fkine(self.robot2.model.getpos));
+                %fkine = aR.model.fkine(aR.model.getpos);
+                %translate = transl(fkine)
+                pause(0.5)
+            end
         end
 
         
