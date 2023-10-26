@@ -1,5 +1,5 @@
 clear all
-clf
+close all
 clc
 
 %% 6 link A0509
@@ -28,47 +28,86 @@ robot.plot(q,'workspace',workspace,'scale',scale); % Plot the robot
 % A0509
 
 %% A0509 test movement
-aR = A0509;
+baseTr = [1,0,0,1; 0,1,0,-0.5; 0,0,1,0.5; 0,0,0,1];
+aR = A0509(baseTr);
+%aR.model.base = transl(0.75, 0.125, 0.3);
+aR.model.base = aR.model.base.T * trotz(pi);
 
-plant1 = [-0.9,   -0.4,   0];
-plant2 = [0.9, 0.5,   0];
+plant1 = [-0.9, -0.4,   0];
+plant2 = [0.9,   0.5,   0];
 plant3 = [-0.85, 0.4,   0];
 plant4 = [-0.4, -0.5,   0];
 plant5 = [-0.2, -0.4,   0];
 plant6 = [0,    -0.5,   0];
-plant7 = [0.45, 0.05,   0];
-plant8 = [0.3,  0.05,   0];
-plant9 = [0.4,  0.4,    0];
+plant7 = [0.45,  0.05,  0];
+plant8 = [0.3,   0.05,  0];
+plant9 = [0.4,   0.4,   0];
 plants = [plant1;plant2;plant3;plant4;plant5;plant6;plant7;plant8;plant9];
 plants = [plant1;plant2;plant3];
 
-plantPoses = zeros(3,6);
+wateringPos1 = [0.75, -0.4, 0.5+0.05];
+wateringPos2 = [0.75,  0,   0.5+0.05];
+watering = [wateringPos1; wateringPos2; wateringPos1; wateringPos2; wateringPos1; wateringPos2];
+
+wateringPoses = zeros(6,6);
 %shelfPoses = zeros(9,6);
-for i=1:size(plants)
-    plantPoses(i,:) = aR.model.ikcon(transl(plants(i,:))*trotx(pi));
+for i=1:size(watering)
+    wateringPoses(i,:) = aR.model.ikcon(transl(watering(i,:))*trotx(pi));
     %shelfPoses(i,:) = r.model.ikcon(transl(e.endBricks(i,:))*trotx(pi));
 end
 
-axis([-1.3,1,-1,1,0,1.5])
+axis([-2,2,-2,2,0,2])
 
-for i=1:size(plantPoses)
-    qPath = jtraj(aR.model.getpos,plantPoses(i,:),100); % Creates path of robot current pos to brick at index i
+for i=1:size(wateringPoses)
+    qPath = jtraj(aR.model.getpos,wateringPoses(i,:),100); % Creates path of robot current pos to brick at index i
     animateRobot(qPath,aR); % Steps over the qPath and animates the robot
     pos = transl(aR.model.fkine(aR.model.getpos))
     %fkine = aR.model.fkine(aR.model.getpos);
     %translate = transl(fkine)
     pause(0.5)
 end
-animateRobot(jtraj(aR.model.getpos,aR.model.ikcon(transl(0,0,0.8)*trotx(pi)),100),aR)
-pause(1)
-for i=1:size(plantPoses)
-    qPath = jtraj(robot.getpos,plantPoses(i,:),50); % Creates path of robot current pos to brick at index i
-    for i=1:size(qPath)
-        robot.animate(qPath(i,:));
-        drawnow();
-    end
-    pos = transl(robot.fkine(robot.getpos))
-    %fkine = aR.model.fkine(aR.model.getpos);
-    %translate = transl(fkine)
-    pause(0.5)
-end
+% pause
+% animateRobot(jtraj(aR.model.getpos,aR.model.ikcon(transl(0,0,0.8)*trotx(pi)),100),aR)
+% pause(1)
+% for i=1:size(plantPoses)
+%     qPath = jtraj(robot.getpos,plantPoses(i,:),50); % Creates path of robot current pos to brick at index i
+%     for i=1:size(qPath)
+%         robot.animate(qPath(i,:));
+%         drawnow();
+%     end
+%     pos = transl(robot.fkine(robot.getpos))
+%     %fkine = aR.model.fkine(aR.model.getpos);
+%     %translate = transl(fkine)
+%     pause(0.5)
+% end
+
+% plantPoses = zeros(3,6);
+% %shelfPoses = zeros(9,6);
+% for i=1:size(plants)
+%     plantPoses(i,:) = aR.model.ikcon(transl(plants(i,:))*trotx(pi));
+%     %shelfPoses(i,:) = r.model.ikcon(transl(e.endBricks(i,:))*trotx(pi));
+% end
+% 
+% axis([-1.3,1,-1,1,0,1.5])
+% 
+% for i=1:size(plantPoses)
+%     qPath = jtraj(aR.model.getpos,plantPoses(i,:),100); % Creates path of robot current pos to brick at index i
+%     animateRobot(qPath,aR); % Steps over the qPath and animates the robot
+%     pos = transl(aR.model.fkine(aR.model.getpos))
+%     %fkine = aR.model.fkine(aR.model.getpos);
+%     %translate = transl(fkine)
+%     pause(0.5)
+% end
+% animateRobot(jtraj(aR.model.getpos,aR.model.ikcon(transl(0,0,0.8)*trotx(pi)),100),aR)
+% pause(1)
+% for i=1:size(plantPoses)
+%     qPath = jtraj(robot.getpos,plantPoses(i,:),50); % Creates path of robot current pos to brick at index i
+%     for i=1:size(qPath)
+%         robot.animate(qPath(i,:));
+%         drawnow();
+%     end
+%     pos = transl(robot.fkine(robot.getpos))
+%     %fkine = aR.model.fkine(aR.model.getpos);
+%     %translate = transl(fkine)
+%     pause(0.5)
+% end

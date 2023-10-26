@@ -20,13 +20,17 @@ classdef Lab2ClassTest <handle
             clf;
             hold on;
             SpawnGreenhouseEnvironment();
-            
             self.robot1 = LinearUR5;
+            self.robot1.model;
+            %self.UR5Grip = UR5_Gripper;
             self.robot2 = A0509;
             
             drawnow()
+%             self.A0509Grip = A0509_Gripper;
             self.Populate_variables(self)
+            
             self.placePlants(self);
+%             self.PlacePlantOnTable(self);
             self.i = 0;
             for i=1:size(self.Plant_Position, 1)
                 inital_goal = self.Plant_Position(i,:);
@@ -51,7 +55,7 @@ classdef Lab2ClassTest <handle
             for i= 1:size(self.Plant_Position, 1)
                 self.Plants(i) = PlaceObject(['Plant.ply'], [self.Plant_Position(i,:)]);
             end
-            self.Watering_Can = PlaceObject(['Watering_can.ply'], [1, 0.15, 0.5])
+            self.Watering_Can = PlaceObject(['HalfSizedRedGreenBrick.ply'], [0.25, 0.15, 0.5])
 
             camlight;
             hold on;
@@ -91,7 +95,7 @@ classdef Lab2ClassTest <handle
 
                 %loops through animation
                 for j = 1:size(Movenment,1)
-                    Plant_trajectory = Movenment(j,:);
+                    Plant_trajectory = Movenment(j,:)
                     for k = 1:size(Plant_trajectory,1)
                         x = Plant_trajectory(k,:);
                         self.robot1.model.animate(x);
@@ -111,7 +115,11 @@ classdef Lab2ClassTest <handle
                 delete(self.Plants(i))
                 Final_goal(3) = Final_goal(3) - offset;
                 self.Plants(i) = PlaceObject('Plant.ply', Final_goal);
-        end       
+
+        end
+        
+
+
 
         function waterPlant(self, inital_goal, Final_goal,i)
            offset = 0;
@@ -183,7 +191,7 @@ classdef Lab2ClassTest <handle
                 self.Plant_Position(9,:) =[-0.7,0.6,0.6];
     
                 
-                self.Table_Position(1,:) =[0.75, -0.4, 0.5];
+                self.Table_Position(1,:) =[0.25, 0.15, 0.5];
                 self.Table_Position(2,:) =[0.25, 0,0.5];
                 self.Table_Position(3,:) =[0.25,-0.15,0.5];
                 self.Table_Position(4,:) =[0.25,0.15,0.525];
@@ -214,7 +222,7 @@ classdef Lab2ClassTest <handle
                 rest(3) = rest(3)+0.5;
                 steps = 50;
                 if robot == 2
-                   
+                    
                     qinital = self.robot2.model.ikcon(transl(CurrentPosition)*trotx(pi)); % uses ikcon to get joint angles and prevent collision. multiplied by trotx(pi) to rotate end-effector
                     qstart = self.robot2.model.ikcon(transl(start)*trotx(pi)); % uses ikcon to get joint angles and prevent collision. multiplied by trotx(pi) to rotate end-effector
                     qfinish = self.robot2.model.ikcon(transl(finish)*trotx(pi));
