@@ -25,13 +25,20 @@ classdef Lab2ClassTest <handle
         plant8
         plant9
         plants
+
         plantObjects
         plantVertices
         updatedPlantVerts
         endPlants
+
+
         watering
         wateringPos1
         wateringPos2
+        WateringCanObjects
+        WateringCanVertices
+        updatedWateringCanVerts
+        endwateringCans
         
     end
 
@@ -91,6 +98,10 @@ classdef Lab2ClassTest <handle
                 transform = [self.plantVertices,ones(size(self.plantVertices,1),1)] * transl(self.plants(i,:))';
                 set(self.plantObjects{i},'Vertices',transform(:,1:3));
             end
+                self.wateringCanObjects = PlaceObject('Watering_can.ply'); % Placing plants into world
+                self.wateringCanVertices = get(self.wateringCanObjects,'Vertices');
+                transform = [self.wateringCanVertices,ones(size(self.plantVertices,1),1)] * transl(self.plants(i,:))';
+                set(self.plantObjects{i},'Vertices',transform(:,1:3));
             self.Watering_Can = PlaceObject('HalfSizedRedGreenBrick.ply', [0.25, 0.15, 0.5])
         end
 
@@ -285,15 +296,15 @@ classdef Lab2ClassTest <handle
                 if robot == 2
                     
                     qinital = self.robot2.model.ikcon(transl(CurrentPosition)*trotx(pi)); % uses ikcon to get joint angles and prevent collision. multiplied by trotx(pi) to rotate end-effector
-                    qstart = self.robot2.model.ikcon(transl(start)*trotx(pi)); % uses ikcon to get joint angles and prevent collision. multiplied by trotx(pi) to rotate end-effector
-                    qfinish = self.robot2.model.ikcon(transl(finish)*trotx(pi));
-                    qrest = self.robot2.model.ikcon(transl(rest)*trotx(pi));                   
+                    qstart = self.robot2.model.ikcon(transl(start)*trotx(pi/2)); % uses ikcon to get joint angles and prevent collision. multiplied by trotx(pi) to rotate end-effector
+                    qfinish = self.robot2.model.ikcon(transl(finish)*trotx(pi/2));
+                    qrest = self.robot2.model.ikcon(transl(rest)*trotx(pi/2));                   
                     
                 else
-                    qinital = self.robot1.model.ikcon(transl(CurrentPosition)*trotx(pi)); % uses ikcon to get joint angles and prevent collision. multiplied by trotx(pi) to rotate end-effector
-                    qstart = self.robot1.model.ikcon(transl(start)*trotx(pi)*trotz(pi/2)); % uses ikcon to get joint angles and prevent collision. multiplied by trotx(pi) to rotate end-effector
-                    qfinish = self.robot1.model.ikcon(transl(finish)*trotx(pi)*trotz(pi/2));
-                    qrest = self.robot1.model.ikcon(transl(rest)*trotx(pi)*trotz(pi/2));
+                    qinital = self.robot1.model.ikcon(transl(CurrentPosition)*trotx(pi/2)*troty(pi/2)); % uses ikcon to get joint angles and prevent collision. multiplied by trotx(pi) to rotate end-effector
+                    qstart = self.robot1.model.ikcon(transl(start)*trotx(pi/2)*troty(pi/2)); % uses ikcon to get joint angles and prevent collision. multiplied by trotx(pi) to rotate end-effector
+                    qfinish = self.robot1.model.ikcon(transl(finish)*trotx(pi/2)*troty(pi/2));
+                    qrest = self.robot1.model.ikcon(transl(rest)*trotx(pi/2)*troty(pi/2));
 
                 end
                 self.Jtraj_inital_start = jtraj(qinital,qstart,steps);
