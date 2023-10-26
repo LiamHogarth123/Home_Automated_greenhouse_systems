@@ -162,12 +162,13 @@ classdef Lab2ClassTest <handle
                         self.updatedPlantVerts = [self.plantVertices,ones(size(self.plantVertices,1),1)] * tr';
                         set(self.plantObjects{count},'Vertices',self.updatedPlantVerts(:,1:3)); % Updates brick position to end effector transform
                         drawnow();
-                        pause(0.05)
                     end
                     disp(' ');
                     disp(['Current joint values: [', num2str(self.Jtraj_start_finish(i,:)), ']']); % Prints joint values after finishing motion
+                    
                     self.updatedPlantVerts = [self.plantVertices,ones(size(self.plantVertices,1),1)] * tr';
-                        set(self.plantObjects{count},'Vertices',self.updatedPlantVerts(:,1:3)); % Updates brick position to end effector transform
+                    set(self.plantObjects{count},'Vertices',self.updatedPlantVerts(:,1:3)); % Updates brick position to end effector transform
+                    %endPlantObjects(:,end+1) = [PlaceObject('Plant.ply',self.watering(i,:))];
                     drawnow();
 
                     pos = transl(self.robot1.model.fkine(self.robot1.model.getpos))
@@ -209,14 +210,14 @@ classdef Lab2ClassTest <handle
 
 
        function waterPlant(self)
-            wateringPos1 = [0.25, -0.4, 0.5+0.05];
-            wateringPos2 = [0.25,  0,   0.5+0.05];
-            watering = [wateringPos1; wateringPos2; wateringPos1; wateringPos2; wateringPos1; wateringPos2];
+            % wateringPos1 = [0.75, -0.4, 0.5+0.05];
+            % wateringPos2 = [0.75,  0,   0.5+0.05];
+            % watering = [wateringPos1; wateringPos2; wateringPos1; wateringPos2; wateringPos1; wateringPos2];
             
             wateringPoses = zeros(6,6);
             %shelfPoses = zeros(9,6);
-            for i=1:size(watering)
-                wateringPoses(i,:) = self.robot2.model.ikcon(transl(watering(i,:))*trotx(pi));
+            for i=1:size(self.watering)
+                wateringPoses(i,:) = self.robot2.model.ikcon(transl(self.watering(i,:))*trotx(pi));
                 %shelfPoses(i,:) = r.model.ikcon(transl(e.endBricks(i,:))*trotx(pi));
             end
             
@@ -225,7 +226,7 @@ classdef Lab2ClassTest <handle
             for i=1:size(wateringPoses)
                 qPath = jtraj(self.robot2.model.getpos,wateringPoses(i,:),100); % Creates path of robot current pos to brick at index i
                 for j=1:size(qPath)
-                     self.robot2.model.animate(qPath(j,:));
+                    self.robot2.model.animate(qPath(j,:));
         
                     drawnow();
                 end
