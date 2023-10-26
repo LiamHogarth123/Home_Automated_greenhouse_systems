@@ -22,7 +22,7 @@ classdef Lab2ClassTest <handle
             SpawnGreenhouseEnvironment();
             self.robot1 = LinearUR5;
             self.robot1.model;
-            self.UR5Grip = UR5_Gripper;
+            %self.UR5Grip = UR5_Gripper;
             self.robot2 = A0509;
             
             drawnow()

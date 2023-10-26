@@ -23,4 +23,7 @@ surf([-1.8,-1.8;1.8,1.8] ...
 view(3)
 
 
-house = PlaceObject(['greenhousescaled.ply'], [0,0,0]);
+house = PlaceObject('GreenHouseLargerNowall.ply', [0,0,0]);
+xlim([-2, 2])
+ylim([-2, 2])
+zlim([0, 2])
