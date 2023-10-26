@@ -39,6 +39,8 @@ classdef Lab2ClassTest <handle
         wateringCanVertices
         updatedWateringCanVerts
         endwateringCans
+        waterCan
+        waterCans
         
     end
 
@@ -57,9 +59,11 @@ classdef Lab2ClassTest <handle
             
             
             %A0509 initialisation
-            baseTr = [1,0,0,1; 0,1,0,-0.5; 0,0,1,0.5; 0,0,0,1];
+            baseTr = [1,0,0,1; 0,1,0,-0.5; 0,0,1,0.55; 0,0,0,1];
             self.robot2 = A0509(baseTr);
-            self.robot2.model.base = self.robot2.model.base.T * trotz(pi);
+            % self.robot2.model.base = self.robot2.model.base.T * trotz(pi);
+            % self.robot2.PlotAndColourRobot();
+            drawnow()
             
             %drawnow()
 %             self.A0509Grip = A0509_Gripper;
@@ -106,13 +110,15 @@ classdef Lab2ClassTest <handle
                 transform = [self.plantVertices,ones(size(self.plantVertices,1),1)] * transl(self.plants(i,:))';
                 set(self.plantObjects{i},'Vertices',transform(:,1:3));
             end
-
-
-                self.wateringCanObjects = PlaceObject('Watering_can.ply'); % Placing plants into world
-                self.wateringCanVertices = get(self.wateringCanObjects,'Vertices');
-                transform = [self.wateringCanVertices,ones(size(self.wateringCanVertices,1),1)] * transl([0.75, -0.4, 0.5+0.05])';
-                set(self.wateringCanObjects,'Vertices',transform(:,1:3));
             
+            self.wateringCanObjects = cell(1,1);
+            %self.wateringCanObjects = PlaceObject('Watering_can.ply',[1, -1.2, 0.5+0.05]); % Placing plants into world
+            self.wateringCanObjects{1} = PlaceObject('Watering_can.ply');
+            self.wateringCanVertices = get(self.wateringCanObjects{1},'Vertices');
+            %self.wateringCanVertices = [get(self.wateringCanObjects,'Vertices'), ones(size(get(self.wateringCanObjects,'Vertices'),1),1)] * trotz(pi/2);
+            transform = [self.wateringCanVertices,ones(size(self.wateringCanVertices,1),1)] * transl(self.waterCan)';
+            %set(self.wateringCanObjects,'Vertices',self.wateringCanVertices(:,1:3));
+            set(self.wateringCanObjects{1},'Vertices',transform(:,1:3));
         end
 
    
@@ -222,25 +228,54 @@ classdef Lab2ClassTest <handle
             end
             
             axis([-2,2,-2,2,0,2])
-            
-            %for i=1:size(wateringPoses)
-                qPath = jtraj(self.robot2.model.getpos,wateringPoses(count,:),100); % Creates path of robot current pos to brick at index i
-                % for j=1:size(qPath)
-                %     self.robot2.model.animate(qPath(j,:));
-                % 
-                %     drawnow();
-                % end
-                animateRobot(qPath,self.robot2);
-                pause(0.5);
-                
-                qPath = jtraj(self.robot2.model.getpos,q0,50);
-                animateRobot(qPath,self.robot2);
 
-                pos = transl(self.robot2.model.fkine(self.robot2.model.getpos));
-                %fkine = aR.model.fkine(aR.model.getpos);
-                %translate = transl(fkine)
+            if count == 1
+                waterCanPose = self.robot2.model.ikcon(transl(self.waterCan)*trotz(pi))
+                qPath = jtraj(self.robot2.model.getpos,waterCanPose,100);
+                animateRobot(qPath,self.robot2);
                 pause(0.5)
-            %end
+                %self.i = self.i + 1;
+            end
+            
+            qPath = jtraj(self.robot2.model.getpos,q0,50);
+            for j=1:size(qPath)
+                self.robot2.model.animate(qPath(j,:)) 
+                tr = self.robot2.model.fkine(self.robot2.model.getpos).T;
+                tr = tr * trotx(-pi/2);
+                self.updatedWateringCanVerts = [self.wateringCanVertices,ones(size(self.wateringCanVertices,1),1)] * tr';
+                set(self.wateringCanObjects{1},'Vertices',self.updatedWateringCanVerts(:,1:3)); % Updates can position to end effector transform
+                drawnow();
+            end
+            pause(0.5);
+            
+            qPath = jtraj(self.robot2.model.getpos,wateringPoses(count,:),100); % Creates path of robot current pos to brick at index i
+            for j=1:size(qPath)
+                self.robot2.model.animate(qPath(j,:)) 
+                tr = self.robot2.model.fkine(self.robot2.model.getpos).T;
+                tr = tr * trotx(-pi/2);
+                self.updatedWateringCanVerts = [self.wateringCanVertices,ones(size(self.wateringCanVertices,1),1)] * tr';
+                set(self.wateringCanObjects{1},'Vertices',self.updatedWateringCanVerts(:,1:3)); % Updates can position to end effector transform
+                drawnow();
+            end
+
+            % %for i=1:size(wateringPoses)
+            %     qPath = jtraj(self.robot2.model.getpos,wateringPoses(count,:),100); % Creates path of robot current pos to brick at index i
+            %     % for j=1:size(qPath)
+            %     %     self.robot2.model.animate(qPath(j,:));
+            %     % 
+            %     %     drawnow();
+            %     % end
+            %     animateRobot(qPath,self.robot2);
+            %     pause(0.5);
+            % 
+            %     qPath = jtraj(self.robot2.model.getpos,q0,50);
+            %     animateRobot(qPath,self.robot2);
+            % 
+            %     pos = transl(self.robot2.model.fkine(self.robot2.model.getpos));
+            %     %fkine = aR.model.fkine(aR.model.getpos);
+            %     %translate = transl(fkine)
+            %     pause(0.5)
+            % %end
         end
 
         
@@ -291,7 +326,9 @@ classdef Lab2ClassTest <handle
                 self.wateringPos1 = [0.5, -0.4, 0.5+0.05];
                 self.wateringPos2 = [0.5,  0.1,   0.5+0.05];
                 self.watering = [self.wateringPos1; self.wateringPos2; self.wateringPos1; self.wateringPos2; self.wateringPos1; self.wateringPos2];
-
+                
+                self.waterCan = [0.7, -1, 0.5+0.05];%[1, -1.2, 0.5+0.05];
+                self.waterCans = [self.waterCan];
             end
 
 
