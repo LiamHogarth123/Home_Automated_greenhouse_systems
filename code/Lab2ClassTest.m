@@ -76,7 +76,7 @@ classdef Lab2ClassTest <handle
         
                 self.PlaceOnePlantOnTable(self, inital_goal,final_goal, i)
                 % watering_can_position = [0.25, 0.15, 0.5];
-                self.waterPlant(self)
+                self.waterPlant(self, i)
                 self.PlaceOnePlantOnTable(self, final_goal,inital_goal, i)
 %                
             end
@@ -209,11 +209,11 @@ classdef Lab2ClassTest <handle
 
 
 
-       function waterPlant(self)
+        function waterPlant(self, count)
             % wateringPos1 = [0.75, -0.4, 0.5+0.05];
             % wateringPos2 = [0.75,  0,   0.5+0.05];
             % watering = [wateringPos1; wateringPos2; wateringPos1; wateringPos2; wateringPos1; wateringPos2];
-            
+            q0 = [0,0,0,0,0,0];
             wateringPoses = zeros(6,6);
             %shelfPoses = zeros(9,6);
             for i=1:size(self.watering)
@@ -223,19 +223,24 @@ classdef Lab2ClassTest <handle
             
             axis([-2,2,-2,2,0,2])
             
-            for i=1:size(wateringPoses)
-                qPath = jtraj(self.robot2.model.getpos,wateringPoses(i,:),100); % Creates path of robot current pos to brick at index i
-                for j=1:size(qPath)
-                    self.robot2.model.animate(qPath(j,:));
-        
-                    drawnow();
-                end
+            %for i=1:size(wateringPoses)
+                qPath = jtraj(self.robot2.model.getpos,wateringPoses(count,:),100); % Creates path of robot current pos to brick at index i
+                % for j=1:size(qPath)
+                %     self.robot2.model.animate(qPath(j,:));
+                % 
+                %     drawnow();
+                % end
+                animateRobot(qPath,self.robot2);
+                pause(0.5);
+                
+                qPath = jtraj(self.robot2.model.getpos,q0,50);
+                animateRobot(qPath,self.robot2);
 
                 pos = transl(self.robot2.model.fkine(self.robot2.model.getpos));
                 %fkine = aR.model.fkine(aR.model.getpos);
                 %translate = transl(fkine)
                 pause(0.5)
-            end
+            %end
         end
 
         
