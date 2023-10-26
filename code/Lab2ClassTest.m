@@ -224,7 +224,7 @@ classdef Lab2ClassTest <handle
             axis([-2,2,-2,2,0,2])
 
             if count == 1
-                waterCanPose = self.robot2.model.ikcon(transl(self.waterCan)*trotz(pi))
+                waterCanPose = self.robot2.model.ikcon(transl(self.waterCan)*trotz(pi/2)*troty(pi/2))
                 qPath = jtraj(self.robot2.model.getpos,waterCanPose,100);
                 animateRobot(qPath,self.robot2);
                 pause(0.5)
