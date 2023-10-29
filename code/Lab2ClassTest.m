@@ -209,7 +209,7 @@ classdef Lab2ClassTest <handle
 
 
 
-        function waterPlant(self, count)
+    function waterPlant(self, count)
             % wateringPos1 = [0.75, -0.4, 0.5+0.05];
             % wateringPos2 = [0.75,  0,   0.5+0.05];
             % watering = [wateringPos1; wateringPos2; wateringPos1; wateringPos2; wateringPos1; wateringPos2];
@@ -221,10 +221,10 @@ classdef Lab2ClassTest <handle
                 %shelfPoses(i,:) = r.model.ikcon(transl(e.endBricks(i,:))*trotx(pi));
             end
             
-            axis([-2,2,-2,2,0,2])
+            % axis([-2,2,-2,2,0,2])
 
             if count == 1
-                waterCanPose = self.robot2.model.ikcon(transl(self.waterCan)*trotz(-pi/2)*troty(pi/2))
+                waterCanPose = self.robot2.model.ikcon(transl(self.waterCan)*trotz(-pi/2)*troty(pi/2));
                 qPath = jtraj(self.robot2.model.getpos,waterCanPose,100);
                 animateRobot(qPath,self.robot2);
                 pause(0.5)
@@ -240,8 +240,15 @@ classdef Lab2ClassTest <handle
                 end
                 pause(0.5);
             end
+            M = [1,1,1,1,1,1];
+            wateringPoseTemp = self.watering(1,:);
+            wateringPoseTemp(3)= wateringPoseTemp(3)+ 0.25;
+            plot3(wateringPoseTemp(1),wateringPoseTemp(2),wateringPoseTemp(3),'o')
+%             wateringPoseTemp = self.robot2.model.ikine(transl(wateringPoseTemp)*trotx(pi), 'mask',M, 'forceSoln');
+            wateringPoseTemp = self.robot2.model.ikcon(transl(wateringPoseTemp)*trotx(pi));
+       
 
-            qPath = jtraj(self.robot2.model.getpos,wateringPoses(count,:),100); % Creates path of robot current pos to brick at index i
+            qPath = jtraj(self.robot2.model.getpos,wateringPoseTemp,100); % Creates path of robot current pos to brick at index i
             for j=1:size(qPath)
                 self.robot2.model.animate(qPath(j,:)) 
                 tr = self.robot2.model.fkine(self.robot2.model.getpos).T;
@@ -253,6 +260,12 @@ classdef Lab2ClassTest <handle
             end
             pause(0.5);
 
+            wateringPoseTemp = self.watering(1,:);
+            wateringPoseTemp(3)= wateringPoseTemp(3)+ 0.6;
+            wateringPoseTemp(1)= wateringPoseTemp(1)+ 0.4;
+            plot3(wateringPoseTemp(1),wateringPoseTemp(2),wateringPoseTemp(3),'o')
+%           wateringPoseTemp = self.robot2.model.ikine(transl(wateringPoseTemp)*trotx(pi), 'mask',M, 'forceSoln');
+            q0 = self.robot2.model.ikcon(transl(wateringPoseTemp)*trotx(pi));
             qPath = jtraj(self.robot2.model.getpos,q0,50);
             for j=1:size(qPath)
                 self.robot2.model.animate(qPath(j,:)) 
@@ -321,17 +334,17 @@ classdef Lab2ClassTest <handle
     
                 
                 self.Table_Position(1,:) =[0.25, 0.15, 0.5];
-                self.Table_Position(2,:) =[0.25, 0,0.5];
-                self.Table_Position(3,:) =[0.25,-0.15,0.5];
+                self.Table_Position(2,:) =[0.25, 0.15,0.5];
+                self.Table_Position(3,:) =[0.25,0.15,0.5];
                 self.Table_Position(4,:) =[0.25,0.15,0.525];
-                self.Table_Position(5,:) =[0.25,0,0.525];
-                self.Table_Position(6,:) =[0.25,-0.15,0.525];
+                self.Table_Position(5,:) =[0.25,0.15,0.525];
+                self.Table_Position(6,:) =[0.25,0.15,0.525];
                 self.Table_Position(7,:) =[0.25,0.15,0.55];
-                self.Table_Position(8,:) =[0.25,0,0.55];
-                self.Table_Position(9,:) =[0.25,-0.15,0.55];
+                self.Table_Position(8,:) =[0.25,0.15,0.55];
+                self.Table_Position(9,:) =[0.25,0.15,0.55];
 
                 self.wateringPos1 = [0.5, -0.4, 0.5+0.05];
-                self.wateringPos2 = [0.5,  0.1,   0.5+0.05];
+                self.wateringPos2 = [0.5,  -0.4,   0.5+0.05];
                 self.watering = [self.wateringPos1; self.wateringPos2; self.wateringPos1; self.wateringPos2; self.wateringPos1; self.wateringPos2];
                 
                 self.waterCan = [0.7, -1, 0.5+0.05];%[1, -1.2, 0.5+0.05];
