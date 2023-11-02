@@ -54,7 +54,7 @@ classdef Lab2ClassTestLaim <handle
             %UR5 initialisation
             self.robot1 = LinearUR5;
             self.robot1.model;
-            %self.UR5Grip = UR5_Gripper;
+            self.UR5Grip = Grippertogether;
             
             
             
@@ -63,24 +63,21 @@ classdef Lab2ClassTestLaim <handle
             self.robot2 = A0509(baseTr);
             % self.robot2.model.base = self.robot2.model.base.T * trotz(pi);
             % self.robot2.PlotAndColourRobot();
-            %self.A0509Grip = A0509_Gripper;
+            self.A0509Grip = Grippertogether;
             drawnow()
             
                 
             self.Populate_variables(self)
             self.placePlants(self);
-
-
+                
+            bacon = self.robot1.model.fkine(self.robot1.model.getpos());
+            eggs = self.robot2.model.fkine(self.robot2.model.getpos());
+            self.A0509Grip.MoveGripper(eggs);
+            self.UR5Grip.MoveGripper(bacon);
             self.i = 0;
             for i=1:size(self.plants)
-
-                inital_goal = self.plants(i,:);
-                final_goal = self.watering(i,:);
-        
-                self.PlaceOnePlantOnTable(self, inital_goal,final_goal, i)
-                self.waterPlant(self, i)
-                self.PlaceOnePlantOnTable(self, final_goal,inital_goal, i)
-               
+%                 self.A0509Grip.closeGripper(eggs);
+                self.A0509Grip.OpenGripper(eggs);
             end
 
            
