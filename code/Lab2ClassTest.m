@@ -51,6 +51,13 @@ classdef Lab2ClassTest <handle
             clf;
             hold on;
             SpawnGreenhouseEnvironment();
+
+            % % Person object for testing collision detection
+            % person = PlaceObject('personMaleCasual.ply', [-0.7, 0, 0]);
+            % verts = [get(person, 'Vertices'), ones(size(get(person, 'Vertices'), 1), 1)];
+            % set(person, 'Vertices', verts(:, 1:3));
+            % pointCloud = verts(:, 1:3);
+
             
             %UR5 initialisation
             self.robot1 = LinearUR5;
