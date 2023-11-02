@@ -31,7 +31,7 @@ classdef main %< GUI
             while (true)
                 x = x+1
                 getEstopStatus
-                pause(2)
+                pause(1)
             end
         end
     end
