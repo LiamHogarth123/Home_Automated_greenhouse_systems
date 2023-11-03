@@ -47,6 +47,9 @@ classdef Lab2ClassTestBackup <handle
         state
         estop
         Arduino
+
+        offset_z = 0.15
+        offset_y
         
     end
 
@@ -106,7 +109,7 @@ classdef Lab2ClassTestBackup <handle
                     final_goal = self.watering(1,:);
                     current_position = self.robot1.model.getpos();
                     current_position = (self.robot1.model.fkine(current_position).t)';
-                    movement = self.CalcjtrajAttempt2(self, current_position, inital_goal, final_goal, 1);
+                    movement = self.CalcjtrajAttempt2(self, current_position, inital_goal, final_goal);
                     
                     qPath = self.Jtraj_inital_start;
                     self.animateBoth(self, qPath, qPath2, true, true, false);
@@ -129,6 +132,14 @@ classdef Lab2ClassTestBackup <handle
                 self.i = self.i + 1;
                 inital_goal = self.plants(i,:);
                 final_goal = self.watering(i,:);
+
+                %adding offset to the motion
+                inital_goal(1) = inital_goal(1) - 0.1;
+                final_goal(1) = final_goal(1) + 0.1;
+                inital_goal(3) = inital_goal(3) + self.offset_z;
+                final_goal(3) = final_goal(3) + self.offset_z;
+
+                
                 % current_position = self.robot1.model.getpos();
                 % current_position = (self.robot1.model.fkine(current_position).t)';
                 % movement = self.CalcjtrajAttempt2(self, current_position, inital_goal, final_goal, 1);
@@ -152,15 +163,29 @@ classdef Lab2ClassTestBackup <handle
                 % qPath2 = jtraj(self.robot2.model.getpos,q0,50);
                 self.animateBoth(self, qPath, qPath2, true, false, false); % r1 rest, r2 nothing?
                 % pause(0.5)
+                return_to_table = self.watering(i-1,:);
                 
-                qinitial = self.robot1.model.ikcon(transl(self.watering(i-1,:))*trotx(pi/2)*troty(pi/2));
+                %ADD OFFSETS
+                 %adding offset to the motion
+                return_to_table(1) = return_to_table(1) + 0.2;      
+                return_to_table(3) = return_to_table(3) + self.offset_z;
+
+
+                qinitial = self.robot1.model.ikcon(transl(return_to_table)*trotx(pi/2)*troty(pi/2));
                 qPath = jtraj(self.robot1.model.getpos,qinitial,50);
                 % qPath2 = jtraj(self.robot2.model.getpos,wateringPoses(1,:),50);
                 self.animateBoth(self, qPath, qPath2, true, false, false); % r1 goes back to plant1 on table, r2 nothing
                 pause(0.5)
                 
                 self.i = self.i - 1; %take the previous plantObject back to shelf
-                qstart = self.robot1.model.ikcon(transl(self.plants(i-1,:))*trotx(pi/2)*troty(pi/2));
+                return_to_shelf = self.plants(i-1,:);
+                
+                %ADD OFFSETS
+                 %adding offset to the motion
+                return_to_shelf(1) = return_to_shelf(1) - 0.1;
+                return_to_shelf(3) = return_to_shelf(3) + self.offset_z;
+
+                qstart = self.robot1.model.ikcon(transl(return_to_shelf)*trotx(pi/2)*troty(pi/2));
                 qPath = jtraj(self.robot1.model.getpos,qstart,50);
                 % qPath2 = jtraj(self.robot2.model.getpos,wateringPoses(2,:),50);
                 self.animateBoth(self, qPath, qPath2, true, false, true); % r1 goes back to shelf1 with plant, r2 nothing
@@ -201,14 +226,18 @@ classdef Lab2ClassTestBackup <handle
 
         function animateBoth(self, qPath, qPath2, flag, flag2, carryingPlant)
             for i=1:size(qPath) % qPath of both needs to be of same size
+               
+                
                 %check estop!!!!!!!
 %                 self.Arduino.ReadArduino(self.state)
                 self.estop = getEstopStatus();
 
                 while self.estop == 1
-%                     self.estop = getEstopStatus();
+                    self.estop = getEstopStatus();
                     self.Arduino.ReadArduino(self.state)
                 end
+
+
 
                 if flag
                     self.robot1.model.animate(qPath(i,:));
@@ -227,8 +256,8 @@ classdef Lab2ClassTestBackup <handle
                 if carryingPlant
                     tr = self.robot1.model.fkine(self.robot1.model.getpos).T;
                     tr = tr * trotx(-pi/2);
-%                     tr(3,4) = tr(3,4) + 0.3; % Z offset
-%                     tr(1,4) = tr(1,4) - 0.2; % x offset axis of endereffector
+                    tr(3,4) = tr(3,4) - 0.1; % Z offset
+                    tr(1,4) = tr(1,4) + 0.1; % x offset axis of endereffector
 %                     tr(2,4) = tr(2,4) - 0.2; % x offset left/right of endereffector
                     
                     self.updatedPlantVerts = [self.plantVertices,ones(size(self.plantVertices,1),1)] * tr';
@@ -279,179 +308,7 @@ classdef Lab2ClassTestBackup <handle
         end
         
         
-        
-        function PlaceOnePlantOnTable(self, inital_goal, Final_goal, count)
-            %% placing plants on table
-            offset = 0;
-            
-            inital_goal(3) = inital_goal(3) + offset;             
-            Final_goal(3) = Final_goal(3) + offset;
-            current_position = self.robot1.model.getpos();
-            rest_goal = Final_goal(1) -0.4;
-                
-%            %finds the required step to animate the robot
-%            GetplantTraj = self.Calcjtraj(self, current_position, inital_goal, 1);
-%            inital_goal = self.robot1.model.ikcon(transl(inital_goal));
-%            DelivPlant = self.Calcjtraj(self, inital_goal, Final_goal, 1);
-%            Final_goal = self.robot1.model.ikcon(transl(Final_goal));
-%            rest = self.Calcjtraj(self, Final_goal, rest_goal, 1);
-%            Movenment = [GetplantTraj;DelivPlant;rest];
-            current_position = (self.robot1.model.getpos());
-            current_position = (self.robot1.model.fkine(current_position).t)';
-
-            movement = self.CalcjtrajAttempt2(self, current_position, inital_goal, Final_goal, 1);
-            endPlantObjects = [];
-
-            %for i=1:size(brickPoses)
-                %count = i;                    
-                %qPath = jtraj(r.model.getpos,brickPoses(i,:),100); % Creates path of robot current pos to brick at index i
-                animateRobot(self.Jtraj_inital_start,self.robot1); % Steps over the qPath and animates the robot, takes a flag to indicate whether the brick is being picked up
-                posR1shelf = transl(self.robot1.model.fkine(self.robot1.model.getpos))
-                % fkine = self.robot1.model.fkine(self.robot1.model.getpos);
-                % translateR1 = transl(fkine);
-                pause(0.5);
-            
-                %qPath = jtraj(r.model.getpos,wallPoses(i,:),100); % Creates path of robot current pos (previous plant start) to dropoff point at index i
-                % animateRobot(qPath,r);
-                for j=1:size(self.Jtraj_start_finish)
-                    self.robot1.model.animate(self.Jtraj_start_finish(j,:));
-                    tr = self.robot1.model.fkine(self.robot1.model.getpos).T;
-                    tr = tr * trotx(-pi/2);
-                    self.updatedPlantVerts = [self.plantVertices,ones(size(self.plantVertices,1),1)] * tr';
-                    set(self.plantObjects{count},'Vertices',self.updatedPlantVerts(:,1:3)); % Updates plant position to end effector transform
-                    drawnow();
-                end
-                disp(' ');
-                disp(['Current joint values: [', num2str(self.Jtraj_start_finish(count,:)), ']']); % Prints joint values after finishing motion
-                
-                self.updatedPlantVerts = [self.plantVertices,ones(size(self.plantVertices,1),1)] * tr';
-                set(self.plantObjects{count},'Vertices',self.updatedPlantVerts(:,1:3)); % Updates plant position to end effector transform
-                %endPlantObjects(:,end+1) = [PlaceObject('Plant.ply',self.watering(i,:))];
-                drawnow();
-                posR1dropoff = transl(self.robot1.model.fkine(self.robot1.model.getpos))
-                pause(0.5);
-                %disp(['Place plant down at: [', num2str(pos2), '] Moving to: [', num2str(pos3), ']']);
-                animateRobot(self.Jtraj_finish_rest,self.robot1);
-                pause(0.5);
-            %end
-            % qPath = jtraj(r.model.getpos,q0,50); % Resets position for final movement
-            % animateRobot(qPath,
-            %loops through animation
-            % for j = 1:size(movement,1)
-            %     Plant_trajectory = movement(j,:)
-            %     for k = 1:size(Plant_trajectory,1)
-            %         x = Plant_trajectory(k,:);
-            %         self.robot1.model.animate(x);
-            %         pause(0.25);
-            %         if j > 50 && j < 100
-            %             delete(self.Plants(i))
-            %             RobotEndeffector = (self.robot1.model.fkine(x).t)';
-            %             self.Plants(i) = PlaceObject('Plant.ply', RobotEndeffector);                           
-            %             drawnow()
-            % 
-            %         end
-            %         j                                                                       
-            %     end                                                   
-            % end
-            % delete(self.Plants(i))
-            % self.Plants(i) = PlaceObject('Plant.ply', Final_goal);
-            % delete(self.Plants(i))
-            % Final_goal(3) = Final_goal(3) - offset;
-            % self.Plants(i) = PlaceObject('Plant.ply', Final_goal);
-        end
-        
-
-
-
-        function waterPlant(self, count)
-            % wateringPos1 = [0.75, -0.4, 0.5+0.05];
-            % wateringPos2 = [0.75,  0,   0.5+0.05];
-            % watering = [wateringPos1; wateringPos2; wateringPos1; wateringPos2; wateringPos1; wateringPos2];
-            q0 = [0,0,0,0,0,0];
-            wateringPoses = zeros(6,6);
-            %shelfPoses = zeros(9,6);
-            for i=1:size(self.watering)
-                wateringPoses(i,:) = self.robot2.model.ikcon(transl(self.watering(i,:))*trotx(pi));%*troty(-pi/2)); %*trotx(pi));
-                %shelfPoses(i,:) = r.model.ikcon(transl(e.endBricks(i,:))*trotx(pi));
-            end
-            
-            % axis([-2,2,-2,2,0,2])
-
-            if count == 1
-                waterCanPose = self.robot2.model.ikcon(transl(self.waterCan)*trotz(-pi/2)*troty(pi/2));
-                qPath = jtraj(self.robot2.model.getpos,waterCanPose,100);
-                animateRobot(qPath,self.robot2);
-                pause(0.5)
-                
-                qPath = jtraj(self.robot2.model.getpos,q0,50);
-                for j=1:size(qPath)
-                    self.robot2.model.animate(qPath(j,:))
-                    tr = self.robot2.model.fkine(self.robot2.model.getpos).T;
-                    tr = tr * troty(-pi/2) * trotz(pi/2); %trotx(-pi/2);
-                    self.updatedWateringCanVerts = [self.wateringCanVertices,ones(size(self.wateringCanVertices,1),1)] * tr';
-                    set(self.wateringCanObjects{1},'Vertices',self.updatedWateringCanVerts(:,1:3)); % Updates can position to end effector transform
-                    drawnow();
-                end
-                pause(0.5);
-            end
-            M = [1,1,1,1,1,1];
-            wateringPoseTemp = self.watering(1,:);
-            wateringPoseTemp(3)= wateringPoseTemp(3)+ 0.25;
-            plot3(wateringPoseTemp(1),wateringPoseTemp(2),wateringPoseTemp(3),'o')
-%             wateringPoseTemp = self.robot2.model.ikine(transl(wateringPoseTemp)*trotx(pi), 'mask',M, 'forceSoln');
-            wateringPoseTemp = self.robot2.model.ikcon(transl(wateringPoseTemp)*trotx(pi));
-       
-
-            qPath = jtraj(self.robot2.model.getpos,wateringPoseTemp,100); % Creates path of robot current pos to brick at index i
-            for j=1:size(qPath)
-                self.robot2.model.animate(qPath(j,:)) 
-                tr = self.robot2.model.fkine(self.robot2.model.getpos).T;
-                % tr = tr * trotx(-pi/2);
-                tr = tr * troty(-pi/2) * trotz(pi/2); % undo the pose translation in reverse. ie watercanpose was z,y, so undo with -y,-z
-                self.updatedWateringCanVerts = [self.wateringCanVertices,ones(size(self.wateringCanVertices,1),1)] * tr';
-                set(self.wateringCanObjects{1},'Vertices',self.updatedWateringCanVerts(:,1:3)); % Updates can position to end effector transform
-                drawnow();
-            end
-            pause(0.5);
-
-            wateringPoseTemp = self.watering(1,:);
-            wateringPoseTemp(3)= wateringPoseTemp(3)+ 0.6;
-            wateringPoseTemp(1)= wateringPoseTemp(1)+ 0.4;
-            plot3(wateringPoseTemp(1),wateringPoseTemp(2),wateringPoseTemp(3),'o')
-%           wateringPoseTemp = self.robot2.model.ikine(transl(wateringPoseTemp)*trotx(pi), 'mask',M, 'forceSoln');
-            q0 = self.robot2.model.ikcon(transl(wateringPoseTemp)*trotx(pi));
-            qPath = jtraj(self.robot2.model.getpos,q0,50);
-            for j=1:size(qPath)
-                self.robot2.model.animate(qPath(j,:)) 
-                tr = self.robot2.model.fkine(self.robot2.model.getpos).T;
-                % tr = tr * trotx(-pi/2);
-                tr = tr * troty(-pi/2) * trotz(pi/2);
-                self.updatedWateringCanVerts = [self.wateringCanVertices,ones(size(self.wateringCanVertices,1),1)] * tr';
-                set(self.wateringCanObjects{1},'Vertices',self.updatedWateringCanVerts(:,1:3)); % Updates can position to end effector transform
-                drawnow();
-            end
-            pause(0.5);
-
-            % %for i=1:size(wateringPoses)
-            %     qPath = jtraj(self.robot2.model.getpos,wateringPoses(count,:),100); % Creates path of robot current pos to brick at index i
-            %     % for j=1:size(qPath)
-            %     %     self.robot2.model.animate(qPath(j,:));
-            %     % 
-            %     %     drawnow();
-            %     % end
-            %     animateRobot(qPath,self.robot2);
-            %     pause(0.5);
-            % 
-            %     qPath = jtraj(self.robot2.model.getpos,q0,50);
-            %     animateRobot(qPath,self.robot2);
-            % 
-            %     pos = transl(self.robot2.model.fkine(self.robot2.model.getpos));
-            %     %fkine = aR.model.fkine(aR.model.getpos);
-            %     %translate = transl(fkine)
-            %     pause(0.5)
-            % %end
-        end
-
+ 
         
         
         function Populate_variables(self)
@@ -468,12 +325,12 @@ classdef Lab2ClassTestBackup <handle
             self.Plant_Position(8,:) =[-0.6,0.6,0.6];
             self.Plant_Position(9,:) =[-0.7,0.6,0.6];
             
-            self.plant1 = [0.12,0.6, 0.31];
-            self.plant2 = [0.02, 0.6, 0.31];
-            self.plant3 = [-0.1,0.6,0.31];
-            self.plant4 = [-0.2, 0.6, 0.31];
-            self.plant5 = [-0.3, 0.6, 0.31];
-            self.plant6 = [-0.4, 0.6, 0.31];
+            self.plant1 = [0.15,0.6, 0.31];
+            self.plant2 = [-0.15, 0.6, 0.31];
+            self.plant3 = [-0.45,0.6,0.31];
+            self.plant4 = [0.15, 0.6, 0.71];
+            self.plant5 = [-0.15, 0.6, 0.71];
+            self.plant6 = [-0.45, 0.6, 0.71];
             self.plant7 = [-0.5,0.6,0.6];
             self.plant8 = [-0.6,0.6,0.6];
             self.plant9 = [-0.7,0.6,0.6];
@@ -497,37 +354,27 @@ classdef Lab2ClassTestBackup <handle
 
             self.waterCan = [0.7, -1, 0.5+0.05];%[1, -1.2, 0.5+0.05];
             self.waterCans = [self.waterCan];
-            state = 0;
-            estop = 0;
+            self.state = 0;
+            self.estop = 0;
         end
 
 
 
-        function [trajectory] = CalcjtrajAttempt2(self, CurrentPosition, start, finish, robot)
+        function [trajectory] = CalcjtrajAttempt2(self, CurrentPosition, start, finish)
             rest = finish;
             rest(3) = rest(3)+0.5;
             steps = 50;
             
-%             start(2) = start(2) - 0.2;
-%             finish(1) = finish(1) - 0.2;
-%             start(3) = start(3) + 0.1;
-%             finish(3) = finish(3) + 0.1;
-%             
+            start(1) = start(1) - 0.1;
+            finish(1) = finish(1) + 0.2;
+            start(3) = start(3) + self.offset_z;
+            finish(3) = finish(3) + self.offset_z+0.1;
 
-
-            if robot == 2
-                
-                qinital = self.robot2.model.ikcon(transl(CurrentPosition)*trotx(pi)); % uses ikcon to get joint angles and prevent collision. multiplied by trotx(pi) to rotate end-effector
-                qstart = self.robot2.model.ikcon(transl(start)*trotx(pi/2)); % uses ikcon to get joint angles and prevent collision. multiplied by trotx(pi) to rotate end-effector
-                qfinish = self.robot2.model.ikcon(transl(finish)*trotx(pi/2));
-                qrest = self.robot2.model.ikcon(transl(rest)*trotx(pi/2));                   
-                
-            else
-                qinital = self.robot1.model.ikcon(transl(CurrentPosition)*trotx(pi/2)*troty(pi/2)); % uses ikcon to get joint angles and prevent collision. multiplied by trotx(pi) to rotate end-effector
-                qstart = self.robot1.model.ikcon(transl(start)*trotx(pi/2)*troty(pi/2)*troty(pi/2)); % uses ikcon to get joint angles and prevent collision. multiplied by trotx(pi) to rotate end-effector
-                qfinish = self.robot1.model.ikcon(transl(finish)*trotx(pi/2)*troty(pi/2));
-                qrest = self.robot1.model.ikcon(transl(rest)*trotx(pi/2)*troty(pi/2));
-            end
+            qinital = self.robot1.model.ikcon(transl(CurrentPosition)*trotx(pi/2)*troty(pi/2)); % uses ikcon to get joint angles and prevent collision. multiplied by trotx(pi) to rotate end-effector
+            qstart = self.robot1.model.ikcon(transl(start)*trotx(pi/2)*troty(pi/2)); % uses ikcon to get joint angles and prevent collision. multiplied by trotx(pi) to rotate end-effector
+            qfinish = self.robot1.model.ikcon(transl(finish)*trotx(pi/2)*troty(pi/2));
+            qrest = self.robot1.model.ikcon(transl(rest)*trotx(pi/2)*troty(pi/2));
+   
             self.Jtraj_inital_start = jtraj(qinital,qstart,steps);
             self.Jtraj_start_finish = jtraj(qstart,qfinish,steps);
             self.Jtraj_finish_rest = jtraj(qfinish,qrest,steps);
