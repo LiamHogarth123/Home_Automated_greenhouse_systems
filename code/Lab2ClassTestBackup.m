@@ -103,7 +103,7 @@ classdef Lab2ClassTestBackup <handle
             self.movingCan = false;
             
             for i=1:size(self.plants)
-                i
+                
                 %for the first plant zet up
                 if i==1
                     self.i = i;
@@ -187,7 +187,7 @@ classdef Lab2ClassTestBackup <handle
                 % qPath2 = jtraj(self.robot2.model.getpos,wateringPoses(2,:),50);
                 self.animateBoth(self, qPath, qPath2, true, false, true); % r1 places plant on table, r2 nothing
                 pause(0.5)
-                self.UR5Grip.OpenGripper(self.robot1.model.fkine(self.robot1.model.getpos()));
+%                 self.UR5Grip.OpenGripper(self.robot1.model.fkine(self.robot1.model.getpos()));
     
                 qrest = self.robot1.model.ikcon(transl(final_goal(1),final_goal(2),final_goal(3)+0.5)*trotx(pi/2)*troty(pi/2));
                 qPath = jtraj(self.robot1.model.getpos,qrest,50);
@@ -255,7 +255,7 @@ classdef Lab2ClassTestBackup <handle
             self.animateBoth(self, qPath, qPath2, true, false, false); % r1 picks up final plant, r2 nothing
             pause(0.5)
 
-            qstart = self.robot1.model.ikcon(transl(end_goal)*trotx(pi/2)*troty(pi));
+            qstart = self.robot1.model.ikcon(transl(end_goal)*trotx(pi/2)*troty(pi/2));
             qPath = jtraj(self.robot1.model.getpos,qstart,50);
             self.animateBoth(self, qPath, qPath2, true, false, true); % r1 returns final plant, r2 nothing
             pause(0.5)
@@ -284,11 +284,19 @@ classdef Lab2ClassTestBackup <handle
             for i=1:size(loop) % qPath of both needs to be of same size
                 % check estop!!!!!!!
                 % self.Arduino.ReadArduino(self.state)
+%                 self.state = self.Arduino.ReadArduino(self.Arduino, self.state);
                 self.estop = getEstopStatus();
+%                 if (self.state == 1)
+%                     setEstopStatus(1);
+%                 end
 
                 while self.estop == 1
                     self.estop = getEstopStatus();
-                    self.Arduino.ReadArduino(self.state)
+       
+%                     self.state = self.Arduino.ReadArduino(self.Arduino, self.state);
+%                     if (self.state == 3)
+%                     setEstopStatus(0);
+%                     end
                 end
 
                 if flag

@@ -36,12 +36,12 @@ classdef ArduinoClass
                     writeDigitalPin(self.a, 'D5', 0);
                 else 
                     writeDigitalPin(self.a, 'D5', 1);
-                    state = 3;
+                    state = 2;
                     writeDigitalPin(self.a, 'D4', 0);
                 end
             end
             button2 = readDigitalPin(self.a,'D2');
-            if (button2 == 1 && state == 3)
+            if (button2 == 1 && state == 2)
                 setEstopStatus(0);
                 %tell ardino to set green light on
                 writeDigitalPin(self.a, 'D6', 1);
