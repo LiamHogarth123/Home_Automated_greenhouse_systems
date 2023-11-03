@@ -1,4 +1,4 @@
-classdef Lab2ClassTestBackup <handle
+classdef Lab2ClassTestJonah <handle
     %UNTITLED4 Summary of this class goes here
     %   Detailed explanation goes here
 
