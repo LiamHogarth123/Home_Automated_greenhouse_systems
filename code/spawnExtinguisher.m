@@ -1,6 +1,6 @@
 function [vertex,faces,faceNormals] = spawnExtinguisher
 
-    fire = PlaceObject('fire.ply',[0.6,-0.1,0.5]);
+    fire = PlaceObject('fire.ply',[0.6,-0.7,0.5]);
     verts = [get(fire,'Vertices'), ones(size(get(fire,'Vertices'),1),1)];
     set(fire,'Vertices',verts(:,1:3));
     vertex = verts(:, 1:3);
