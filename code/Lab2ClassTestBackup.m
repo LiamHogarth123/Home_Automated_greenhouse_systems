@@ -35,6 +35,8 @@ classdef Lab2ClassTestBackup <handle
         watering
         wateringPos1
         wateringPos2
+        wateringPos1Offset
+        wateringPos2Offset
         wateringCanObjects
         wateringCanVertices
         updatedWateringCanVerts
@@ -90,7 +92,10 @@ classdef Lab2ClassTestBackup <handle
             q0 = [0,0,0,0,pi/2,0];
             wateringPoses = zeros(6,6);
             for i=1:size(self.watering)
-                wateringPoses(i,:) = self.robot2.model.ikcon(transl(self.watering(i,:))*trotx(pi)*troty(-pi/2));
+                X = self.watering(i,:);
+                X(3) = X(3) + 0.2;
+                X(2) = X(2) - 0.05;
+                wateringPoses(i,:) = self.robot2.model.ikcon(transl(X)*trotx(pi)*troty(-pi/2));
             end
 
           
@@ -368,18 +373,18 @@ classdef Lab2ClassTestBackup <handle
             % self.Plant_Position(8,:) =[-0.6,0.6,0.6];
             % self.Plant_Position(9,:) =[-0.7,0.6,0.6];
             
-            % self.plant1 = [0.15,0.6, 0.31];
-            % self.plant2 = [-0.15, 0.6, 0.31];
-            % self.plant3 = [-0.45,0.6,0.31];
-            % self.plant4 = [0.15, 0.6, 0.71];
-            % self.plant5 = [-0.15, 0.6, 0.71];
-            % self.plant6 = [-0.45, 0.6, 0.71];
-            self.plant1 = [0.1, 0.5, 0.34];
-            self.plant2 = [-0.05, 0.5, 0.34];
-            self.plant3 = [-0.2, 0.5,0.34];
-            self.plant4 = [-0.35, 0.5, 0.34];
-            self.plant5 = [-0.5, 0.5, 0.34];
-            self.plant6 = [-0.65, 0.5, 0.34];
+            self.plant1 = [0.15,0.6, 0.31];
+            self.plant2 = [-0.15, 0.6, 0.31];
+            self.plant3 = [-0.45,0.6,0.31];
+            self.plant4 = [0.15, 0.6, 0.71];
+            self.plant5 = [-0.15, 0.6, 0.71];
+            self.plant6 = [-0.45, 0.6, 0.71];
+%             self.plant1 = [0.1, 0.5, 0.34];
+%             self.plant2 = [-0.05, 0.5, 0.34];
+%             self.plant3 = [-0.2, 0.5,0.34];
+%             self.plant4 = [-0.35, 0.5, 0.34];
+%             self.plant5 = [-0.5, 0.5, 0.34];
+%             self.plant6 = [-0.65, 0.5, 0.34];
             % self.plant7 = [-0.5,0.6,0.6];
             % self.plant8 = [-0.6,0.6,0.6];
             % self.plant9 = [-0.7,0.6,0.6];
@@ -399,6 +404,8 @@ classdef Lab2ClassTestBackup <handle
             self.wateringPos1 = [0.5, -0.4, 0.5+0.05];
             % self.wateringPos2 = [0.5,  -0.4,   0.5+0.05];
             self.wateringPos2 = [0.5,  0.1,   0.5+0.05];
+            self.wateringPos1Offset = [0.5, -0.4, 0.5+0.25]
+            self.wateringPos2Offset = [0.5,  0.1,   0.5+0.25]
             self.watering = [self.wateringPos1; self.wateringPos2; self.wateringPos1; self.wateringPos2; self.wateringPos1; self.wateringPos2];
             
 
