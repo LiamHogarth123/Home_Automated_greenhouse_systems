@@ -48,10 +48,16 @@ classdef Lab2ClassTestBackup <handle
         %estop
         state
         estop
-        Arduino
+        ArduinoController
 
         offset_z = 0.15
         offset_y
+
+        %collision dectection
+        vertex
+        faces
+        faceNormals
+
         
     end
 
@@ -61,6 +67,9 @@ classdef Lab2ClassTestBackup <handle
             clf;
             hold on;
             SpawnGreenhouseEnvironment();
+            self.estop = 0;
+            setEstopStatus(0);
+%             [self.vertex,self.faces,self.faceNormals] = spawnExtinguisher;
             
             %UR5 initialisation
             self.robot1 = LinearUR5;
@@ -73,7 +82,7 @@ classdef Lab2ClassTestBackup <handle
             self.A0509Grip = Grippertogether;
             drawnow()
             
-%             self.Arduino = ArduinoClass;
+            self.ArduinoController = ArduinoClass;
 
             %initialise workspace variables and dynamic objects.
             self.Populate_variables(self)
@@ -213,9 +222,9 @@ classdef Lab2ClassTestBackup <handle
                 return_to_shelf = self.plants(i-1,:);
                 
                 %ADD OFFSETS
-                 %adding offset to the motion
+                %adding offset to the motion
                 return_to_shelf(1) = return_to_shelf(1) - 0.1;
-                return_to_shelf(3) = return_to_shelf(3) + self.offset_z;
+                return_to_shelf(3) = return_to_shelf(3) + self.offset_z + 0.3;
 
                 qstart = self.robot1.model.ikcon(transl(return_to_shelf)*trotx(pi/2)*troty(pi));
                 qPath = jtraj(self.robot1.model.getpos,qstart,50);
@@ -284,19 +293,26 @@ classdef Lab2ClassTestBackup <handle
             for i=1:size(loop) % qPath of both needs to be of same size
                 % check estop!!!!!!!
                 % self.Arduino.ReadArduino(self.state)
-%                 self.state = self.Arduino.ReadArduino(self.Arduino, self.state);
+                collided = checkCollision(self.robot2.model,qPath2(i,:),self.faces,self.vertex,self.faceNormals,true);
+                collided = 0;
+                
+                state_ = self.state;
+                self.state = self.ArduinoController.ReadArduino(state_);
                 self.estop = getEstopStatus();
-%                 if (self.state == 1)
-%                     setEstopStatus(1);
-%                 end
+                if (self.state == 1 || collided == 1)
+                    setEstopStatus(1);
+                end
 
                 while self.estop == 1
                     self.estop = getEstopStatus();
-       
-%                     self.state = self.Arduino.ReadArduino(self.Arduino, self.state);
-%                     if (self.state == 3)
-%                     setEstopStatus(0);
-%                     end
+                    state_ = self.state;
+                    pause(1);
+        
+                    self.state = self.ArduinoController.ReadArduino(state_);
+                    if (self.state == 3)
+                        setEstopStatus(0);
+                        self.estop = 0;
+                    end
                 end
 
                 if flag
