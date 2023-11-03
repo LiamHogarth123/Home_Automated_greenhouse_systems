@@ -90,7 +90,7 @@ classdef Lab2ClassTestBackup <handle
             q0 = [0,0,0,0,pi/2,0];
             wateringPoses = zeros(6,6);
             for i=1:size(self.watering)
-                wateringPoses(i,:) = self.robot2.model.ikcon(transl(self.watering(i,:))*trotx(pi)*troty(-pi/2));
+                wateringPoses(i,:) = self.robot2.model.ikcon(transl(self.watering(i,1)-0.5,self.watering(i,2),self.watering(i,3)+0.6)*trotx(pi)*troty(-pi/2));
             end
 
           
@@ -210,16 +210,16 @@ classdef Lab2ClassTestBackup <handle
                 %ADD OFFSETS
                  %adding offset to the motion
                 return_to_shelf(1) = return_to_shelf(1) - 0.1;
-                return_to_shelf(3) = return_to_shelf(3) + self.offset_z;
+                return_to_shelf(3) = return_to_shelf(3) + self.offset_z+0.35;
 
-                qstart = self.robot1.model.ikcon(transl(return_to_shelf)*trotx(pi/2)*troty(pi));
+                qstart = self.robot1.model.ikcon(transl(return_to_shelf)*trotx(pi/2)*troty(pi/2));
                 qPath = jtraj(self.robot1.model.getpos,qstart,50);
                 % qPath2 = jtraj(self.robot2.model.getpos,wateringPoses(2,:),50);
                 self.animateBoth(self, qPath, qPath2, true, false, true); % r1 goes back to shelf1 with plant, r2 nothing
                 pause(0.5)
                 self.i = self.i + 1; %increment for next loop
                 self.UR5Grip.OpenGripper(self.robot1.model.fkine(self.robot1.model.getpos));
-                qrest = self.robot1.model.ikcon(transl([0,0.25,0.6])*trotx(pi/2)*troty(pi));
+                qrest = self.robot1.model.ikcon(transl([0,0.25,0.6])*trotx(pi/2)*troty(pi/2));
                 qPath = jtraj(self.robot1.model.getpos,qrest,50);
                 qPath2 = jtraj(self.robot2.model.getpos,wateringPoses(i,:),50);
                 self.animateBoth(self, qPath, qPath2, true, true, false); % r1 rests, r2 water2
@@ -238,7 +238,9 @@ classdef Lab2ClassTestBackup <handle
             end
 
             end_goal = self.plants(6,:);
-            end_goal(3) = end_goal(3) + 0.4;
+            % end_goal(3) = end_goal(3) + 0.4;
+            end_goal(1) = end_goal(3) - 0.1;
+            end_goal(3) = end_goal(3) + self.offset_z+0.35;
             table_goal = self.watering(6,:);
 
             qPath2 = jtraj(self.robot2.model.getpos,q0,50);
@@ -249,8 +251,8 @@ classdef Lab2ClassTestBackup <handle
             qPath = jtraj(self.robot1.model.getpos,qinitial,50);
             self.animateBoth(self, qPath, qPath2, true, false, false); % r1 picks up final plant, r2 nothing
             pause(0.5)
-
-            qstart = self.robot1.model.ikcon(transl(end_goal)*trotx(pi/2)*troty(pi));
+            
+            qstart = self.robot1.model.ikcon(transl(end_goal)*trotx(pi/2)*troty(pi/2));
             qPath = jtraj(self.robot1.model.getpos,qstart,50);
             self.animateBoth(self, qPath, qPath2, true, false, true); % r1 returns final plant, r2 nothing
             pause(0.5)
