@@ -102,38 +102,11 @@ classdef Lab2ClassTest <handle
             q0 = [0,0,0,0,0,0];
             wateringPoses = zeros(6,6);
             for i=1:size(self.watering)
-                wateringPoses(i,:) = self.robot2.model.ikcon(transl(self.watering(i,:))*trotx(pi));
+                wateringPoses(i,:) = self.robot2.model.ikcon(transl(self.watering(i,:))*trotx(pi)*troty(-pi/2));
             end
 
-            % wateringPoses = zeros(2,6);
-            % zOffset = 0.25;
-            % wateringPoses(1,:) = self.robot2.model.ikcon(transl(self.watering(1,1),self.watering(1,2),self.watering(1,3)+zOffset)*trotx(pi));
-            % wateringPoses(2,:) = self.robot2.model.ikcon(transl(self.watering(2,1),self.watering(2,2),self.watering(2,3)+zOffset)*trotx(pi));
             self.i = 1;
-            self.movingCan = false;
-            %0
-            % waterCanPose = self.robot2.model.ikcon(transl(self.waterCan)*trotz(-pi/2)*troty(pi/2));
-            % qPath2 = jtraj(self.robot2.model.getpos,waterCanPose,50);
-            % %1
-            % inital_goal = self.plants(1,:);
-            % final_goal = self.watering(1,:);
-            % current_position = self.robot1.model.getpos();
-            % current_position = (self.robot1.model.fkine(current_position).t)';
-            % movement = self.CalcjtrajAttempt2(self, current_position, inital_goal, final_goal, 1);
-            % 
-            % qPath = self.Jtraj_inital_start;
-            % self.animateBoth(self, qPath, qPath2, true, true, false);
-            % pause(0.5)
-            % 
-            % qPath = self.Jtraj_start_finish;
-            % qPath2 = jtraj(self.robot2.model.getpos,q0,50);
-            % self.animateBoth(self, qPath, qPath2, true, true, true);            
-            % pause(0.5)
-            % 
-            % qPath = self.Jtraj_finish_rest;
-            % qPath2 = jtraj(self.robot2.model.getpos,wateringPoses(1,:),50);
-            % self.animateBoth(self, qPath, qPath2, true, true, false); % r1 rests, r2 waters1 just placed plant
-            % pause(0.5)
+            self.movingCan = false;            
             
             for i=1:size(self.plants)
                 if i==1
@@ -160,6 +133,16 @@ classdef Lab2ClassTest <handle
                     qPath = self.Jtraj_finish_rest;
                     qPath2 = jtraj(self.robot2.model.getpos,wateringPoses(1,:),50);
                     self.animateBoth(self, qPath, qPath2, true, true, false); % r1 rests, r2 waters1 just placed plant
+                    pause(0.5)
+                    
+                    rotEndEff = self.robot2.model.getpos;
+                    rotEndEff(6) = -pi/2;
+                    qPath2 = jtraj(self.robot2.model.getpos,rotEndEff,25);
+                    self.animateBoth(self, qPath, qPath2, false, true, false); % r1 nothing, r2 rotates endeff to waters1
+                    rotEndEff = self.robot2.model.getpos;
+                    rotEndEff(6) = 0;
+                    qPath2 = jtraj(self.robot2.model.getpos,rotEndEff,25);
+                    self.animateBoth(self, qPath, qPath2, false, true, false); % r1 nothing, r2 rotates endeff to waters1
                     % pause(0.5)
                     continue;
                 end
@@ -180,20 +163,17 @@ classdef Lab2ClassTest <handle
     
                 qstart = self.robot1.model.ikcon(transl(final_goal)*trotx(pi/2)*troty(pi/2));
                 qPath = jtraj(self.robot1.model.getpos,qstart,50);
-                % qPath2 = jtraj(self.robot2.model.getpos,wateringPoses(2,:),50);
                 self.animateBoth(self, qPath, qPath2, true, false, true); % r1 places plant on table, r2 nothing
                 pause(0.5)
                 
     
                 qrest = self.robot1.model.ikcon(transl(final_goal(1),final_goal(2),final_goal(3)+0.5)*trotx(pi/2)*troty(pi/2));
                 qPath = jtraj(self.robot1.model.getpos,qrest,50);
-                % qPath2 = jtraj(self.robot2.model.getpos,q0,50);
                 self.animateBoth(self, qPath, qPath2, true, false, false); % r1 rest, r2 nothing?
                 % pause(0.5)
                 
                 qinitial = self.robot1.model.ikcon(transl(self.watering(i-1,:))*trotx(pi/2)*troty(pi/2));
                 qPath = jtraj(self.robot1.model.getpos,qinitial,50);
-                % qPath2 = jtraj(self.robot2.model.getpos,wateringPoses(1,:),50);
                 self.animateBoth(self, qPath, qPath2, true, false, false); % r1 goes back to plant1 on table, r2 nothing
                 pause(0.5)
                 
@@ -202,7 +182,6 @@ classdef Lab2ClassTest <handle
                 plant_dropoff(3) = plant_dropoff(3) + 0.4;
                 qstart = self.robot1.model.ikcon(transl(plant_dropoff)*trotx(pi/2)*troty(pi));
                 qPath = jtraj(self.robot1.model.getpos,qstart,50);
-                % qPath2 = jtraj(self.robot2.model.getpos,wateringPoses(2,:),50);
                 self.animateBoth(self, qPath, qPath2, true, false, true); % r1 goes back to shelf1 with plant, r2 nothing
                 pause(0.5)
                 self.i = self.i + 1; %increment for next loop
@@ -211,6 +190,17 @@ classdef Lab2ClassTest <handle
                 qPath = jtraj(self.robot1.model.getpos,qrest,50);
                 qPath2 = jtraj(self.robot2.model.getpos,wateringPoses(i,:),50);
                 self.animateBoth(self, qPath, qPath2, true, true, false); % r1 rests, r2 water2
+                pause(0.5)
+                
+                qPath = jtraj(self.robot1.model.getpos,qrest,25); % gener
+                rotEndEff = self.robot2.model.getpos;
+                rotEndEff(6) = -pi/2;
+                qPath2 = jtraj(self.robot2.model.getpos,rotEndEff,25);
+                self.animateBoth(self, qPath, qPath2, false, true, false); % r1 nothing, r2 rotates endeff to waters1
+                rotEndEff = self.robot2.model.getpos;
+                rotEndEff(6) = 0;
+                qPath2 = jtraj(self.robot2.model.getpos,rotEndEff,25);
+                self.animateBoth(self, qPath, qPath2, false, true, false); % r1 nothing, r2 rotates endeff to waters1
                 % pause(0.15)
             end
 
@@ -233,53 +223,24 @@ classdef Lab2ClassTest <handle
             pause(0.5)
             
             qPath = jtraj(self.robot1.model.getpos,[-0.5,0,0,0,0,0,0],50);
-            self.animateBoth(self, qPath, qPath2, true, false, false); % return to q0;
-
-            % for i=1:size(self.plants)
-            %     inital_goal = self.plants(i,:);
-            %     final_goal = self.watering(i,:);
-            %     current_position = self.robot1.model.getpos();
-            %     current_position = (self.robot1.model.fkine(current_position).t)';
-            %     movement = self.CalcjtrajAttempt2(self, current_position, inital_goal, final_goal, 1);
-            % 
-            %     qPath = self.Jtraj_inital_start;
-            %     if i > 1
-            %         qPath2 = jtraj(self.robot2.model.getpos,q0,50);
-            %     end
-            %     self.animateBoth(self, qPath, qPath2, true, true);
-            %     pause(0.5)
-            % 
-            %     qPath = self.Jtraj_start_finish;
-            %     qPath2 = jtraj(self.robot2.model.getpos,q0,50);
-            %     if i > 1
-            %         qPath2 = jtraj(self.robot2.model.getpos,wateringPoses(i,:),50);
-            %     end
-            %     self.animateBoth(self, qPath, qPath2, true, true);
-            %     pause(0.5)
-            % 
-            %     qPath = self.Jtraj_finish_rest;                
-            %     qPath2 = jtraj(self.robot2.model.getpos,wateringPoses(i,:),50);
-            %     self.animateBoth(self, qPath, qPath2, true, true);
-            %     pause(0.5)
-            %     % % qPath = self.Jtraj_finish_rest;
-            %     % qPath2 = jtraj(self.robot2.model.getpos,q0,50);
-            %     % self.animateBoth(self, qPath, qPath2, true, true);
-            %     % 
-            %     % qPath2 = jtraj(self.robot2.model.getpos,wateringPoses(2,:),50);
-            %     % % self.animateBoth(self, qPath, qPath2, true, true);
-            %     % animateRobot(qPath2, self.robot2)
-            %     % pause
-            % end
-            
-            % for i=1:size(self.plants)
-            %     self.animateBoth(qPath, qPath2, true, true);
-            % end
-
+            self.animateBoth(self, qPath, qPath2, true, false, false); % return to q0;        
             
         end
 
         function animateBoth(self, qPath, qPath2, flag, flag2, carryingPlant)
-            for i=1:size(qPath) % qPath of both needs to be of same size
+            loop=[]; %handling loop size depending on flags
+            if flag == false
+                loop = qPath2;
+            elseif flag
+                loop = qPath;
+            end
+            if flag2 == false
+                loop = qPath;
+            elseif flag2
+                loop = qPath2;
+            end
+
+            for i=1:size(loop) % qPath of both needs to be of same size
                 if flag
                     self.robot1.model.animate(qPath(i,:));
                 end
@@ -321,7 +282,7 @@ classdef Lab2ClassTest <handle
             % camlight;
             % hold on;
 
-            self.plantObjects = cell(9,1);
+            self.plantObjects = cell(6,1);
             for i=1:size(self.plants)
                 self.plantObjects{i} = PlaceObject('Plant.ply'); % Placing plants into world
                 self.plantVertices = get(self.plantObjects{i},'Vertices');
@@ -516,18 +477,18 @@ classdef Lab2ClassTest <handle
         
         
         function Populate_variables(self)
-            self.Table_Position = zeros(6,3);
-            self.Plant_Position = zeros(6,3);
-            
-            self.Plant_Position(1,:) =[0.12,0.6, 0.3];
-            self.Plant_Position(2,:) =[0.02, 0.6, 0.3];
-            self.Plant_Position(3,:) =[-0.1,0.6,0.3];
-            self.Plant_Position(4,:) =[-0.2, 0.6, 0.3];
-            self.Plant_Position(5,:) =[-0.3, 0.6, 0.3];
-            self.Plant_Position(6,:) =[-0.4, 0.6, 0.3];
-            self.Plant_Position(7,:) =[-0.5,0.6,0.6];
-            self.Plant_Position(8,:) =[-0.6,0.6,0.6];
-            self.Plant_Position(9,:) =[-0.7,0.6,0.6];
+            % self.Table_Position = zeros(6,3);
+            % self.Plant_Position = zeros(6,3);
+            % 
+            % self.Plant_Position(1,:) =[0.12,0.6, 0.3];
+            % self.Plant_Position(2,:) =[0.02, 0.6, 0.3];
+            % self.Plant_Position(3,:) =[-0.1,0.6,0.3];
+            % self.Plant_Position(4,:) =[-0.2, 0.6, 0.3];
+            % self.Plant_Position(5,:) =[-0.3, 0.6, 0.3];
+            % self.Plant_Position(6,:) =[-0.4, 0.6, 0.3];
+            % self.Plant_Position(7,:) =[-0.5,0.6,0.6];
+            % self.Plant_Position(8,:) =[-0.6,0.6,0.6];
+            % self.Plant_Position(9,:) =[-0.7,0.6,0.6];
             
             self.plant1 = [0.1, 0.5, 0.34];
             self.plant2 = [-0.05, 0.5, 0.34];
@@ -538,15 +499,16 @@ classdef Lab2ClassTest <handle
             self.plants = [self.plant1;self.plant2;self.plant3;self.plant4;self.plant5;self.plant6];%;self.plant7;self.plant8;self.plant9];
    
             
-            self.Table_Position(1,:) =[0.25, 0.15, 0.5];
-            self.Table_Position(2,:) =[0.25, 0.15,0.5];
-            self.Table_Position(3,:) =[0.25,0.15,0.5];
-            self.Table_Position(4,:) =[0.25,0.15,0.525];
-            self.Table_Position(5,:) =[0.25,0.15,0.525];
-            self.Table_Position(6,:) =[0.25,0.15,0.525];
-            self.Table_Position(7,:) =[0.25,0.15,0.55];
-            self.Table_Position(8,:) =[0.25,0.15,0.55];
-            self.Table_Position(9,:) =[0.25,0.15,0.55];
+            % self.Table_Position(1,:) =[0.25, 0.15, 0.5];
+            % self.Table_Position(2,:) =[0.25, 0.15,0.5];
+            % self.Table_Position(3,:) =[0.25,0.15,0.5];
+            % self.Table_Position(4,:) =[0.25,0.15,0.525];
+            % self.Table_Position(5,:) =[0.25,0.15,0.525];
+            % self.Table_Position(6,:) =[0.25,0.15,0.525];
+            % self.Table_Position(7,:) =[0.25,0.15,0.55];
+            % self.Table_Position(8,:) =[0.25,0.15,0.55];
+            % self.Table_Position(9,:) =[0.25,0.15,0.55];
+
             self.wateringPos1 = [0.5, -0.4, 0.5+0.05];
             % self.wateringPos2 = [0.5,  -0.4,   0.5+0.05];
             self.wateringPos2 = [0.5,  0.1,   0.5+0.05];
