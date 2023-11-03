@@ -1,4 +1,4 @@
-function algebraicDist = collisionDetection(pointCloud, centerPoint)
+function algebraicDist = collisionDetectionTest(pointCloud, centerPoint)
 
 % Check if any point in a matrix is within a specified radius from a center point.
 
