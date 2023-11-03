@@ -52,7 +52,7 @@ classdef Lab2ClassTestJonah <handle
 
     methods
     %%Main !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        function self = Lab2ClassTestBackup()
+    function self = Lab2ClassTestJonah()
             clf;
             hold on;
             SpawnGreenhouseEnvironment();
@@ -159,7 +159,7 @@ classdef Lab2ClassTestJonah <handle
     
                 qrest = self.robot1.model.ikcon(transl(final_goal(1),final_goal(2),final_goal(3)+0.5)*trotx(pi/2)*troty(pi/2));
                 qPath = jtraj(self.robot1.model.getpos,qrest,50);
-                self.animateBoth(self, qPath, qPath2, true, false, false); % r1 rest, r2 nothing?
+                self.animateBoth(self, qPath, qPath2, true, false, false); % r1 rest, r2 nothing
                 % pause(0.5)
                 
                 qinitial = self.robot1.model.ikcon(transl(self.watering(i-1,:))*trotx(pi/2)*troty(pi/2));
