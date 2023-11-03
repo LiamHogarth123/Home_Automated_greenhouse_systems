@@ -22,7 +22,7 @@ classdef ArduinoClass
        
 
         function state = ReadArduino (self, state)
-            value = readDigitalPin(self.a, 'D3')
+            value = readDigitalPin(self.a, 'D3');
             
             if isempty(state)
                 state = 0;

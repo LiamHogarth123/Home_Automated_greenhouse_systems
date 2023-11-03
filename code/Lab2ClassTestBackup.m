@@ -71,7 +71,7 @@ classdef Lab2ClassTestBackup <handle
             self.A0509Grip = Grippertogether;
             drawnow()
             
-%             self.Arduino = ArduinoClass;
+            self.Arduino = ArduinoClass;
 
             %initialise workspace variables and dynamic objects.
             self.Populate_variables(self)
@@ -154,7 +154,7 @@ classdef Lab2ClassTestBackup <handle
                 %close gripper              
                 self.UR5Grip.closeGripper(self.robot1.model.fkine(self.robot1.model.getpos()));
                 %%%%%%%%%%%add interminde point here
-                midpoint = [(final_goal(1)- 0.5),final_goal(2), inital_goal(3)];
+                midpoint = [(final_goal(1)- 0.5),final_goal(2), (final_goal(3)-inital_goal(3))];
 %                 M = [1,1,0,0,0,0]; --- masking doesn't work with a 6 or 7dof robot
 %                 qstart = self.robot1.model.ikine((transl(midpoint)*trotx(pi/2)*troty(pi/2)),'mask',M, 'forceSoln');
                 qstart = self.robot1.model.ikcon((transl(midpoint)*trotx(pi/2)*troty(pi/2)));
@@ -174,7 +174,7 @@ classdef Lab2ClassTestBackup <handle
                 pause(0.5)
                 self.UR5Grip.OpenGripper(self.robot1.model.fkine(self.robot1.model.getpos()));
     
-                qrest = self.robot1.model.ikcon(transl(final_goal(1),final_goal(2),final_goal(3)+0.5)*trotx(pi/2)*troty(pi/2));
+                qrest = self.robot1.model.ikcon(transl((final_goal(1)-0.5),final_goal(2),final_goal(3)+0.5)*trotx(pi/2)*troty(pi/2));
                 qPath = jtraj(self.robot1.model.getpos,qrest,50);
                 % qPath2 = jtraj(self.robot2.model.getpos,q0,50);
                 self.animateBoth(self, qPath, qPath2, true, false, false); % r1 rest, r2 nothing?
@@ -246,10 +246,11 @@ classdef Lab2ClassTestBackup <handle
                
                 
                 %check estop!!!!!!!
-%                 self.Arduino.ReadArduino(self.state)
-                self.estop = getEstopStatus();
+                self.Arduino.ReadArduino(self.Arduino, self.state)
+%                 self.estop = getEstopStatus();
 
-                while self.estop == 1
+                while self.state == 1
+                    pause(5);
                     self.estop = getEstopStatus();
                     self.Arduino.ReadArduino(self.state)
                 end
@@ -380,6 +381,7 @@ classdef Lab2ClassTestBackup <handle
         function [trajectory] = CalcjtrajAttempt2(self, CurrentPosition, start, finish)
             rest = finish;
             rest(3) = rest(3)+0.5;
+            rest(1) = rest(1)-0.5;
             steps = 50;
             
             start(1) = start(1) - 0.1;
