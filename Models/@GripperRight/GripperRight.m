@@ -22,9 +22,9 @@ classdef GripperRight < RobotBaseClass
 
 %% CreateModel
         function CreateModel(self)
-            link(1) = Link('d', 0, 'a', 0.075, 'alpha', 0, 'offset', 0, 'qlim', [-pi, pi]);
-            link(2) = Link('d', 0, 'a', 0.075, 'alpha', 0, 'offset', 0, 'qlim', [-pi, pi]);
-            link(3) = Link('d', 0, 'a', 0.075, 'alpha', 0, 'offset', 0, 'qlim', [-pi, pi]);
+            link(1) = Link('d', 0, 'a', 0.065, 'alpha', 0, 'offset', 0, 'qlim', [-pi, pi]);
+            link(2) = Link('d', 0, 'a', 0.065, 'alpha', 0, 'offset', 0, 'qlim', [-pi, pi]);
+            link(3) = Link('d', 0, 'a', 0.065, 'alpha', 0, 'offset', 0, 'qlim', [-pi, pi]);
 % 
 %             L4 = Link('d', 0, 'a', -0.05, 'alpha', 0, 'offset', 0, 'qlim', [-pi, pi]);
 %             L5 = Link('d', 0, 'a', -0.05, 'alpha', 0, 'offset', 0, 'qlim', [-pi, pi]);

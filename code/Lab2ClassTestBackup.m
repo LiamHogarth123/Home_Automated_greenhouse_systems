@@ -151,12 +151,28 @@ classdef Lab2ClassTestBackup <handle
                 self.animateBoth(self, qPath, qPath2, true, true, false); % r1 fetches new plant2, r2 rests
                 pause(0.5)
     
-                qstart = self.robot1.model.ikcon(transl(final_goal)*trotx(pi/2)*troty(pi/2));
-                qPath = jtraj(self.robot1.model.getpos,qstart,50);
+                %close gripper              
+                self.UR5Grip.closeGripper(self.robot1.model.fkine(self.robot1.model.getpos()));
+                %%%%%%%%%%%add interminde point here
+                midpoint = [(final_goal(1)- 0.5),final_goal(2), inital_goal(3)];
+%                 M = [1,1,0,0,0,0]; --- masking doesn't work with a 6 or 7dof robot
+%                 qstart = self.robot1.model.ikine((transl(midpoint)*trotx(pi/2)*troty(pi/2)),'mask',M, 'forceSoln');
+                qstart = self.robot1.model.ikcon((transl(midpoint)*trotx(pi/2)*troty(pi/2)));
+                qfinsh = self.robot1.model.ikcon(transl(final_goal)*trotx(pi/2)*troty(pi/2),qstart);
+                
+                qPathstart = jtraj(self.robot1.model.getpos,qstart,25);
+                qPathfinish = jtraj(qstart,qfinsh,25);
+
+                qPath = [qPathstart; qPathfinish];
+
+
+
+%                 qstart = self.robot1.model.ikcon(transl(final_goal)*trotx(pi/2)*troty(pi/2));
+%                 qPath = jtraj(self.robot1.model.getpos,qstart,50);
                 % qPath2 = jtraj(self.robot2.model.getpos,wateringPoses(2,:),50);
                 self.animateBoth(self, qPath, qPath2, true, false, true); % r1 places plant on table, r2 nothing
                 pause(0.5)
-                
+                self.UR5Grip.OpenGripper(self.robot1.model.fkine(self.robot1.model.getpos()));
     
                 qrest = self.robot1.model.ikcon(transl(final_goal(1),final_goal(2),final_goal(3)+0.5)*trotx(pi/2)*troty(pi/2));
                 qPath = jtraj(self.robot1.model.getpos,qrest,50);
@@ -166,9 +182,9 @@ classdef Lab2ClassTestBackup <handle
                 return_to_table = self.watering(i-1,:);
                 
                 %ADD OFFSETS
-                 %adding offset to the motion
+                %adding offset to the motion
                 return_to_table(1) = return_to_table(1) + 0.2;      
-                return_to_table(3) = return_to_table(3) + self.offset_z;
+                return_to_table(3) = return_to_table(3) + self.offset_z+0.05;
 
 
                 qinitial = self.robot1.model.ikcon(transl(return_to_table)*trotx(pi/2)*troty(pi/2));
@@ -176,6 +192,7 @@ classdef Lab2ClassTestBackup <handle
                 % qPath2 = jtraj(self.robot2.model.getpos,wateringPoses(1,:),50);
                 self.animateBoth(self, qPath, qPath2, true, false, false); % r1 goes back to plant1 on table, r2 nothing
                 pause(0.5)
+                self.UR5Grip.closeGripper(self.robot1.model.fkine(self.robot1.model.getpos()));
                 
                 self.i = self.i - 1; %take the previous plantObject back to shelf
                 return_to_shelf = self.plants(i-1,:);
@@ -191,7 +208,7 @@ classdef Lab2ClassTestBackup <handle
                 self.animateBoth(self, qPath, qPath2, true, false, true); % r1 goes back to shelf1 with plant, r2 nothing
                 pause(0.5)
                 self.i = self.i + 1; %increment for next loop
-    
+                self.UR5Grip.OpenGripper(self.robot1.model.fkine(self.robot1.model.getpos()));
                 qrest = self.robot1.model.ikcon(transl([0,0.25,0.6])*trotx(pi/2)*troty(pi/2));
                 qPath = jtraj(self.robot1.model.getpos,qrest,50);
                 qPath2 = jtraj(self.robot2.model.getpos,wateringPoses(i,:),50);
@@ -366,7 +383,7 @@ classdef Lab2ClassTestBackup <handle
             steps = 50;
             
             start(1) = start(1) - 0.1;
-            finish(1) = finish(1) + 0.2;
+            finish(1) = finish(1) - 0.1;
             start(3) = start(3) + self.offset_z;
             finish(3) = finish(3) + self.offset_z+0.1;
 
